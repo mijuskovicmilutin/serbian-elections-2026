@@ -1,0 +1,62 @@
+{
+  "documentType": 2,
+  "fields": [],
+  "pagination": "",
+  "records": [
+    {
+      "candidates": "250",
+      "datetime": "1789308660",
+      "document_bearer": "Републичка изборна комисија",
+      "document_name": "1. ИЗБОРНА ЛИСТА АЛЕКСАНДАР ВУЧИЋ – УЈЕДИЊЕНА СРБИЈА",
+      "extfiles_link": [
+        "<div><a href=\"/extfile/sr/files/additionalDocuments/680/792/1. UJEDINJENA SRBIJA ALEKSANDAR VUCIC  - za sajt.docx\" target=\"_blank\"><span class=\"election-file active\"></span></a></div>"
+      ],
+      "municipality_display_name": "РИК",
+      "number": "1."
+    },
+    {
+      "candidates": "250",
+      "datetime": "1789401656",
+      "document_bearer": "Републичка изборна комисија",
+      "document_name": "2. ИЗБОРНА ЛИСТА ИВИЦА ДАЧИЋ - ФАКТОР СТАБИЛНОСТИ! (СОЦИЈАЛИСТИЧКА ПАРТИЈА СРБИЈЕ, „ЈЕДИНСТВЕНА СРБИЈА”, СОЦИЈАЛДЕМОКРАТСКА ПАРТИЈА СРБИЈЕ,  „ЗЕЛЕНИ СРБИЈЕ”)",
+      "extfiles_link": [
+        "<div><a href=\"/extfile/sr/files/additionalDocuments/680/858/2. SPS - IVICA DACIC FAKTOR STABILNOSTI - za sajt.docx\" target=\"_blank\"><span class=\"election-file active\"></span></a></div>"
+      ],
+      "municipality_display_name": "РИК",
+      "number": "2."
+    },
+    {
+      "candidates": "250",
+      "datetime": "1789504611",
+      "document_bearer": "Републичка изборна комисија",
+      "document_name": "3. ИЗБОРНА ЛИСТА „СТУДЕНТСКА ЛИСТА - СТУДЕНТИ ПОБЕЂУЈУ”",
+      "extfiles_link": [
+        "<div><a href=\"/extfile/sr/files/additionalDocuments/680/984/3. STUDENTSKA LISTA - STUDENTI POBEDJUJU - za sajt.docx\" target=\"_blank\"><span class=\"election-file active\"></span></a></div>"
+      ],
+      "municipality_display_name": "РИК",
+      "number": "3."
+    },
+    {
+      "candidates": "250",
+      "datetime": "1789504984",
+      "document_bearer": "Републичка изборна комисија",
+      "document_name": "4. ИЗБОРНА ЛИСТА РАСИМ ЉАЈИЋ – ЉУДСКИ (СДП – ЦДП)",
+      "extfiles_link": [
+        "<div><a href=\"/extfile/sr/files/additionalDocuments/680/993/4. ЛИСТА КАНДИДАТА- РАСИМ ЉАЈИЋ - Људски (СДП - ЦДП) - za sajt.docx\" target=\"_blank\"><span class=\"election-file active\"></span></a></div>"
+      ],
+      "municipality_display_name": "РИК",
+      "number": "4."
+    },
+    {
+      "candidates": "250",
+      "datetime": "1789505726",
+      "document_bearer": "Републичка изборна комисија",
+      "document_name": "5. ИЗБОРНА ЛИСТА VAJDASÁGI MAGYAR SZÖVETSÉG – DR. PÁSZTOR BÁLINT – САВЕЗ ВОЈВОЂАНСКИХ МАЂАРА – ДР БАЛИНТ ПАСТОР",
+      "extfiles_link": [
+        "<div><a href=\"/extfile/sr/files/additionalDocuments/681/005/5. SVM - za sajt.docx\" target=\"_blank\"><span class=\"election-file active\"></span></a></div>"
+      ],
+      "municipality_display_name": "РИК",
+      "number": "5."
+    }
+  ]
+}

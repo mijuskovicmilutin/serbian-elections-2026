@@ -36,6 +36,9 @@ public class ElectoralList extends AuditableEntity {
     @JoinColumn(name = "election_id", nullable = false)
     private Election election;
 
+    @Column(name = "external_id", nullable = false)
+    private String externalId;
+
     @Column(nullable = false)
     private String name;
 
@@ -48,6 +51,9 @@ public class ElectoralList extends AuditableEntity {
 
     @Column(name = "source_url", nullable = false, length = 2048)
     private String sourceUrl;
+
+    @Column(name = "published_at", nullable = false)
+    private Instant publishedAt;
 
     @Column(name = "last_seen_at", nullable = false)
     private Instant lastSeenAt;
