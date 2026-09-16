@@ -1,5 +1,6 @@
 package rs.serbianelection2026.backend.ingestion.rik;
 
+import java.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,13 +14,21 @@ import rs.serbianelection2026.backend.ingestion.entity.ImportStatus;
 public class RikImportJob {
 
     private final RikImportService rikImportService;
+    private final RikProperties properties;
 
-    public RikImportJob(RikImportService rikImportService) {
+    public RikImportJob(RikImportService rikImportService, RikProperties properties) {
         this.rikImportService = rikImportService;
+        this.properties = properties;
     }
 
     @Scheduled(fixedRateString = "${rik.import-interval-ms:900000}")
     public void run() {
+        LocalDate deadline = properties.getElectoralListSubmissionDeadline();
+        if (deadline != null && LocalDate.now().isAfter(deadline)) {
+            log.info("Electoral list submission deadline ({}) has passed, skipping scheduled RIK import", deadline);
+            return;
+        }
+
         log.info("Starting RIK electoral list import");
         DataImport result = rikImportService.importElectoralLists();
         if (result.getStatus() == ImportStatus.SUCCESS) {
