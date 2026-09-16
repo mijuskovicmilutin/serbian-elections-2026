@@ -51,6 +51,9 @@ public class DataImport {
     @Column(name = "records_updated")
     private Integer recordsUpdated;
 
+    @Column(name = "records_unchanged")
+    private Integer recordsUnchanged;
+
     @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;
 }

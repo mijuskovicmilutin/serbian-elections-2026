@@ -23,22 +23,22 @@ public class RikImportJob {
 
     @Scheduled(fixedRateString = "${rik.import-interval-ms:900000}")
     public void run() {
+        log.info("RIK import job triggered (deadline={})", properties.getElectoralListSubmissionDeadline());
+
         LocalDate deadline = properties.getElectoralListSubmissionDeadline();
         if (deadline != null && LocalDate.now().isAfter(deadline)) {
             log.info("Electoral list submission deadline ({}) has passed, skipping scheduled RIK import", deadline);
             return;
         }
 
-        log.info("Starting RIK electoral list import");
         DataImport result = rikImportService.importElectoralLists();
         if (result.getStatus() == ImportStatus.SUCCESS) {
-            log.info(
-                    "RIK import finished: found={}, created={}, updated={}",
-                    result.getRecordsFound(),
-                    result.getRecordsCreated(),
-                    result.getRecordsUpdated());
+            log.info("RIK import job finished successfully (dataImportId={})", result.getId());
         } else {
-            log.error("RIK import failed: {}", result.getErrorMessage());
+            log.error(
+                    "RIK import job finished unsuccessfully (dataImportId={}): {}",
+                    result.getId(),
+                    result.getErrorMessage());
         }
     }
 }

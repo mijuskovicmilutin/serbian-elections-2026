@@ -1,6 +1,8 @@
 package rs.serbianelection2026.backend.ingestion.rik;
 
 import java.net.URI;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -28,28 +30,54 @@ public class RikClient {
     }
 
     public List<RikDocumentRecord> fetchElectoralLists() {
-        List<RikDocumentRecord> all = new ArrayList<>();
-        int page = 1;
-        while (page <= MAX_PAGES) {
-            RikDocumentsResponse response = fetchPage(page);
-            if (response == null || response.records() == null || response.records().isEmpty()) {
-                break;
+        log.info(
+                "Fetching RIK electoral lists: baseUrl={}, electionRoundId={}, documentType={}",
+                properties.getBaseUrl(),
+                properties.getElectionRoundId(),
+                properties.getElectoralListDocumentType());
+        Instant start = Instant.now();
+
+        try {
+            List<RikDocumentRecord> all = new ArrayList<>();
+            int page = 1;
+            while (page <= MAX_PAGES) {
+                log.debug("Fetching RIK page {}", page);
+                RikDocumentsResponse response = fetchPage(page);
+                if (response == null || response.records() == null || response.records().isEmpty()) {
+                    log.debug("Page {} returned no records, stopping pagination", page);
+                    break;
+                }
+                log.debug("Page {} returned {} record(s)", page, response.records().size());
+                all.addAll(response.records());
+                page++;
             }
-            all.addAll(response.records());
-            page++;
+            if (page > MAX_PAGES) {
+                log.warn("Reached RIK pagination safety cap of {} pages, results may be incomplete", MAX_PAGES);
+            }
+
+            log.info(
+                    "Successfully fetched {} RIK record(s) across {} page(s) in {} ms",
+                    all.size(),
+                    page - 1,
+                    Duration.between(start, Instant.now()).toMillis());
+            return all;
+        } catch (RuntimeException e) {
+            log.error(
+                    "Failed to fetch RIK electoral lists after {} ms",
+                    Duration.between(start, Instant.now()).toMillis(),
+                    e);
+            throw e;
         }
-        if (page > MAX_PAGES) {
-            log.warn("Reached RIK pagination safety cap of {} pages, results may be incomplete", MAX_PAGES);
-        }
-        return all;
     }
 
     private RikDocumentsResponse fetchPage(int page) {
+        URI uri = buildUri(page);
         String rawBody = restClient.get()
-                .uri(buildUri(page))
+                .uri(uri)
                 .retrieve()
                 .body(String.class);
         if (rawBody == null || rawBody.isBlank()) {
+            log.debug("Page {} returned an empty response body from {}", page, uri);
             return null;
         }
         return objectMapper.readValue(rawBody, RikDocumentsResponse.class);

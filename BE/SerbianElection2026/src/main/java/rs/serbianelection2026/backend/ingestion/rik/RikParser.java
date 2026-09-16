@@ -22,14 +22,26 @@ public class RikParser {
     }
 
     public List<NormalizedElectoralList> parse(List<RikDocumentRecord> records) {
+        log.info("Parsing {} raw RIK record(s)", records.size());
+
         List<NormalizedElectoralList> result = new ArrayList<>();
+        int skipped = 0;
         for (RikDocumentRecord record : records) {
             try {
-                result.add(parseOne(record));
+                NormalizedElectoralList parsed = parseOne(record);
+                log.debug(
+                        "Parsed record: externalId={}, ballotNumber={}, name={}",
+                        parsed.externalId(),
+                        parsed.ballotNumber(),
+                        parsed.name());
+                result.add(parsed);
             } catch (RuntimeException e) {
+                skipped++;
                 log.warn("Skipping unparsable RIK record: {}", record, e);
             }
         }
+
+        log.info("Parsed {} record(s) successfully, skipped {} unparsable record(s)", result.size(), skipped);
         return result;
     }
 
