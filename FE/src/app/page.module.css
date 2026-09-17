@@ -209,6 +209,68 @@
   }
 }
 
+.predictionCardWrap {
+  margin-top: 16px;
+}
+
+.predictionTitle {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  margin: 0 0 12px;
+  color: #1b1f1c;
+}
+
+.predictionOutcomes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.predictionOutcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e3e5dd;
+}
+
+.predictionOutcome:last-child {
+  border-bottom: none;
+}
+
+.predictionOutcomeName {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1b1f1c;
+}
+
+.predictionOutcomePrice {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 14px;
+  color: #1e5e56;
+}
+
+.predictionDisclaimer {
+  font-size: 11.5px;
+  color: #8b9088;
+  margin: 0 0 10px;
+}
+
+.predictionLink {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e5e56;
+  text-decoration: none;
+}
+
+.predictionLink:hover {
+  text-decoration: underline;
+}
+
 .listBandHead {
   display: flex;
   align-items: baseline;

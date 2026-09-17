@@ -40,6 +40,20 @@ type PageResponse<T> = {
   last: boolean;
 };
 
+export type PredictionMarketOutcome = {
+  name: string;
+  price: number;
+};
+
+export type PredictionMarket = {
+  id: number;
+  provider: string;
+  marketName: string;
+  sourceUrl: string;
+  updatedAt: string;
+  outcomes: PredictionMarketOutcome[];
+};
+
 async function apiFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     next: { revalidate: 60 },
@@ -61,4 +75,16 @@ export function getCurrentElectoralLists() {
 export async function getNewsBySource(source: NewsSource, size = 5) {
   const page = await apiFetch<PageResponse<NewsArticle>>(`/api/v1/news?source=${source}&size=${size}`);
   return page.content;
+}
+
+// Optional/supplementary section: returns null instead of throwing so a missing or
+// not-yet-imported market doesn't take down the rest of the homepage.
+export async function getCurrentPredictionMarket(): Promise<PredictionMarket | null> {
+  const res = await fetch(`${API_URL}/api/v1/prediction-markets/current`, {
+    next: { revalidate: 60 },
+  });
+  if (!res.ok) {
+    return null;
+  }
+  return res.json() as Promise<PredictionMarket>;
 }

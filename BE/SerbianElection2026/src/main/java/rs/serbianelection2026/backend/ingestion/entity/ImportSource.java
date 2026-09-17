@@ -5,5 +5,6 @@ public enum ImportSource {
     N1,
     NOVA,
     BLIC,
-    INFORMER
+    INFORMER,
+    POLYMARKET
 }

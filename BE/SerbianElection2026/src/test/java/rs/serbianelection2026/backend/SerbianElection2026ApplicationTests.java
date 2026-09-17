@@ -5,7 +5,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
-@TestPropertySource(properties = {"rik.import-enabled=false", "news.import-enabled=false"})
+@TestPropertySource(
+        properties = {"rik.import-enabled=false", "news.import-enabled=false", "polymarket.import-enabled=false"})
 class SerbianElection2026ApplicationTests {
 
     @Test
