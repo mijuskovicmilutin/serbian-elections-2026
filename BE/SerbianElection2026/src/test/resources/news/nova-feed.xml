@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<rss xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:media="http://search.yahoo.com/mrss/" version="2.0">
+  <channel>
+    <title>Nova.rs - Feed</title>
+    <link>https://nova.rs/vesti/politika/</link>
+    <description/>
+    <item>
+      <category><![CDATA[Politika]]></category>
+      <category><![CDATA[majkl o'flaerti]]></category>
+      <category><![CDATA[komesar saveta evrope za ljudska prava]]></category>
+      <title>Komesar Saveta Evrope za ljudska prava: Pogoršanje situacije s ljudskim pravima u Srbiji</title>
+      <link>https://nova.rs/vesti/politika/komesar-saveta-evrope-za-ljudska-prava-pogorsanje-situacije-u-srbiji/</link>
+      <description><![CDATA[Komesar Saveta Evrope za ljudska prava Majkl O'Flaerti ukazao je danas na pogoršanje stanja ljudskih prava u Srbiji.]]></description>
+      <media:content url="https://nova.rs/media/images/2026/5/3/1777807793_12332857.width-1200.jpg" type="image/jpeg" medium="image" width="1200"/>
+      <content:encoded><![CDATA[<img src="https://nova.rs/media/images/2026/5/3/1777807793_12332857.width-1200.jpg"/> <p>Komesar Saveta Evrope za ljudska prava.</p>]]></content:encoded>
+      <guid isPermaLink="true">https://nova.rs/vesti/politika/komesar-saveta-evrope-za-ljudska-prava-pogorsanje-situacije-u-srbiji/</guid>
+      <pubDate>Thu, 17 Sep 2026 20:37:16 +0200</pubDate>
+    </item>
+    <item>
+      <category><![CDATA[Politika]]></category>
+      <category><![CDATA[bojan pajtić]]></category>
+      <category><![CDATA[milo lompar]]></category>
+      <category><![CDATA[izbori 2026.]]></category>
+      <title>Da li je Milo Lompar promenio mišljenje o studentskom pokretu ili smo ga pogrešno razumeli</title>
+      <link>https://nova.rs/vesti/politika/da-li-je-milo-lompar-promenio-misljenje-o-studentskom-pokretu-ili-smo-ga-pogresno-razumeli/</link>
+      <description><![CDATA[Veliku pažnju izazvalo je najnovije gostovanje univerzitetskog profesora Mila Lompara.]]></description>
+      <media:content url="https://nova.rs/media/images/2026/4/26/1777230293_DSC_8709.width-1200.jpg" type="image/jpeg" medium="image" width="1200"/>
+      <content:encoded><![CDATA[<img src="https://nova.rs/media/images/2026/4/26/1777230293_DSC_8709.width-1200.jpg"/> <p>Veliku pažnju izazvalo je najnovije gostovanje.</p>]]></content:encoded>
+      <guid isPermaLink="true">https://nova.rs/vesti/politika/da-li-je-milo-lompar-promenio-misljenje-o-studentskom-pokretu-ili-smo-ga-pogresno-razumeli/</guid>
+      <pubDate>Thu, 17 Sep 2026 20:14:47 +0200</pubDate>
+    </item>
+  </channel>
+</rss>
