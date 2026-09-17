@@ -37,11 +37,14 @@
   padding: 0 24px;
 }
 
-.megaPhoto {
-  position: relative;
+.heroAndLists {
   background-image: url("/images/skupstina.jpg");
   background-size: cover;
   background-position: center top;
+}
+
+.megaPhoto {
+  position: relative;
 }
 
 .topbarBand {

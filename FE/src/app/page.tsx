@@ -36,46 +36,48 @@ export default async function Home() {
     <div className={styles.page}>
       <SiteHeader />
 
-      <div className={styles.megaPhoto}>
-        <div className={styles.tintBlue}>
-          <div className={styles.wrap}>
-            <section className={styles.record}>
-              <h1 className={styles.h1}>{election.name}</h1>
-              <p className={styles.recordSubtitle}>Избори за народне посланике</p>
-              <p className={styles.recordDate}>
-                Дан гласања: <b>{formatDateSr(election.electionDate)}</b> · бирачка места отворена 07–20ч
-              </p>
-              <Countdown targetIso={targetIso} />
-            </section>
-          </div>
-        </div>
-        <a
-          className={styles.photoCredit}
-          href="https://commons.wikimedia.org/wiki/File:Beograd_-_Narodna_skup%C5%A1tina_Republike_Srbije_(44881251532).jpg"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          фото: Fred Romero, CC BY 2.0
-        </a>
-      </div>
-
-      <div className={styles.listGrid}>
-        <div className={styles.listCardWrap}>
-          <div className={styles.listBandHead}>
-            <p className={styles.dividerLabel}>
-              Изборне листе са РИК.<span className={styles.liveBadge}>УЖИВО</span>
-            </p>
-            <p className={styles.dividerSub}>Освежава се на 15 минута</p>
-          </div>
-          <div className={styles.listCard}>
-            <div className={styles.sectionHead}>
-              <h2>Изборне листе</h2>
-              <span className={styles.sectionMeta}>
-                {lists.length} {lists.length === 1 ? "листа" : "листе"}
-                {mostRecentlySeen ? ` · ажурирано ${formatRelativeSr(mostRecentlySeen)}` : ""}
-              </span>
+      <div className={styles.heroAndLists}>
+        <div className={styles.megaPhoto}>
+          <div className={styles.tintBlue}>
+            <div className={styles.wrap}>
+              <section className={styles.record}>
+                <h1 className={styles.h1}>{election.name}</h1>
+                <p className={styles.recordSubtitle}>Избори за народне посланике</p>
+                <p className={styles.recordDate}>
+                  Дан гласања: <b>{formatDateSr(election.electionDate)}</b> · бирачка места отворена 07–20ч
+                </p>
+                <Countdown targetIso={targetIso} />
+              </section>
             </div>
-            <ElectoralListsPaginated lists={lists} />
+          </div>
+          <a
+            className={styles.photoCredit}
+            href="https://commons.wikimedia.org/wiki/File:Beograd_-_Narodna_skup%C5%A1tina_Republike_Srbije_(44881251532).jpg"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            фото: Fred Romero, CC BY 2.0
+          </a>
+        </div>
+
+        <div className={styles.listGrid}>
+          <div className={styles.listCardWrap}>
+            <div className={styles.listBandHead}>
+              <p className={styles.dividerLabel}>
+                Изборне листе са РИК.<span className={styles.liveBadge}>УЖИВО</span>
+              </p>
+              <p className={styles.dividerSub}>Освежава се на 15 минута</p>
+            </div>
+            <div className={styles.listCard}>
+              <div className={styles.sectionHead}>
+                <h2>Изборне листе</h2>
+                <span className={styles.sectionMeta}>
+                  {lists.length} {lists.length === 1 ? "листа" : "листе"}
+                  {mostRecentlySeen ? ` · ажурирано ${formatRelativeSr(mostRecentlySeen)}` : ""}
+                </span>
+              </div>
+              <ElectoralListsPaginated lists={lists} />
+            </div>
           </div>
         </div>
       </div>
