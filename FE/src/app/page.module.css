@@ -1,0 +1,606 @@
+.page {
+  --bg: #f1f2ed;
+  --surface: #ffffff;
+  --surface2: #e9ebe4;
+  --ink: #1b1f1c;
+  --ink2: #4b514a;
+  --inkMuted: #868c81;
+  --border: #d7dacf;
+  --borderStrong: #bfc3b5;
+  --accent: #1e5e56;
+  --accentInk: #133e38;
+  --accentBg: #ddeeea;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    --bg: #14181a;
+    --surface: #1b211f;
+    --surface2: #212824;
+    --ink: #e6e8e1;
+    --ink2: #abb1a5;
+    --inkMuted: #6e7469;
+    --border: #2b322d;
+    --borderStrong: #3a423a;
+    --accent: #5fbfb0;
+    --accentInk: #cdefe8;
+    --accentBg: #1d3b36;
+  }
+}
+
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.megaPhoto {
+  position: relative;
+  background-image: url("/images/skupstina.jpg");
+  background-size: cover;
+  background-position: center top;
+}
+
+.topbarBand {
+  background: #c6363c;
+}
+
+.tintBlue {
+  background: rgba(15, 50, 112, 0.64);
+}
+
+.topbar {
+  padding: 18px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.wordmark {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-decoration: none;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.wordmarkAccent {
+  opacity: 0.75;
+}
+
+.nav {
+  display: flex;
+  gap: 22px;
+}
+
+.nav a {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.nav a:hover {
+  color: #ffffff;
+}
+
+.record {
+  padding: 22px 0 30px;
+}
+
+.recordSubtitle {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 22px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.h1 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.15;
+  margin: 0 0 14px;
+  text-wrap: balance;
+  color: #ffffff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+
+.recordDate {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 28px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.recordDate b {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.countdown {
+  display: flex;
+  gap: 0;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  padding: 18px 8px;
+}
+
+.countdownCell {
+  flex: 1;
+  text-align: center;
+  padding: 0 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.countdownCell:first-child {
+  border-left: none;
+}
+
+.countdownNum {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 600;
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+  display: block;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.countdownLabel {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+  display: block;
+  margin-top: 4px;
+}
+
+.photoCredit {
+  position: absolute;
+  right: 24px;
+  bottom: 8px;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.photoCredit:hover {
+  color: #ffffff;
+}
+
+.listGrid {
+  padding: 26px 24px 44px;
+}
+
+.listCardWrap {
+  width: 65%;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 18px 22px 22px;
+  box-shadow: 0 16px 36px rgba(8, 18, 16, 0.25);
+}
+
+@media (min-width: 900px) {
+  .listCardWrap {
+    width: 50%;
+  }
+}
+
+@media (max-width: 520px) {
+  .listCardWrap {
+    width: calc(100% - 24px);
+  }
+}
+
+.listBandHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 0 0 14px;
+  border-bottom: 1px solid #e3e5dd;
+  margin-bottom: 6px;
+}
+
+.dividerLabel {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #1b1f1c;
+  margin: 0;
+}
+
+.liveBadge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #c6363c;
+  margin-left: 6px;
+}
+
+.dividerSub {
+  font-size: 12px;
+  color: #5b6158;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+
+.listCard {
+  padding: 8px 0 4px;
+}
+
+.listCard h2 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0;
+  color: #1b1f1c;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 0 0 4px;
+}
+
+.sectionMeta {
+  font-size: 12px;
+  color: #868c81;
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger {
+  border-top: 1px solid #e3e5dd;
+}
+
+.ledgerRow {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #e3e5dd;
+}
+
+.ledgerNum {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 600;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: #1b1f1c;
+  background: #f1f2ed;
+  border: 1px solid #d7dacf;
+  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ledgerBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.ledgerName {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #1b1f1c;
+  margin: 0 0 6px;
+}
+
+.ledgerMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: #8b9088;
+}
+
+.ledgerSource {
+  color: #5b6158;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ledgerSource:hover {
+  color: #1e5e56;
+}
+
+.ledgerSource svg {
+  width: 11px;
+  height: 11px;
+  flex: none;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+}
+
+.pageBtn {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1b1f1c;
+  background: #f1f2ed;
+  border: 1px solid #d7dacf;
+  border-radius: 7px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.pageBtn:disabled {
+  color: #9aa097;
+  cursor: default;
+}
+
+.pageIndicator {
+  font-size: 12px;
+  color: #868c81;
+  font-variant-numeric: tabular-nums;
+}
+
+.newsSection {
+  padding: 44px 0 8px;
+}
+
+.newsHead {
+  margin-bottom: 6px;
+}
+
+.newsHead h2 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 19px;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+
+.newsHead p {
+  font-size: 13px;
+  color: var(--inkMuted);
+  margin: 0;
+}
+
+.newsRows {
+  margin-top: 20px;
+}
+
+.newsRow {
+  display: grid;
+  grid-template-columns: 82px repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+  margin-bottom: 26px;
+}
+
+.newsRow:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 700px) {
+  .newsRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .newsRowLabel {
+    grid-column: 1 / -1;
+    padding-bottom: 2px;
+  }
+}
+
+.newsRowLabel {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.newsCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.newsCard:hover {
+  border-color: var(--accent);
+}
+
+.newsCardImg {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+  background: var(--surface2);
+}
+
+.newsCardBody {
+  padding: 10px 12px 12px;
+}
+
+.newsCardTitle {
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0 0 8px;
+}
+
+.newsCardCat {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.article {
+  padding: 44px 0 8px;
+  max-width: 620px;
+}
+
+.articleH1 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.2;
+  margin: 0 0 18px;
+  color: var(--ink);
+}
+
+.articleLead {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink2);
+  margin: 0 0 28px;
+}
+
+.sourceList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0 0 28px;
+}
+
+.sourceCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.sourceCardHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.sourceCardHead h2 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0;
+  color: var(--ink);
+}
+
+.sourceStatus {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.sourceStatusPending {
+  color: var(--inkMuted);
+}
+
+.sourceCard p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink2);
+  margin: 0;
+}
+
+.sourceCard a {
+  color: var(--accent);
+}
+
+.articleNote {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--inkMuted);
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+
+.footer {
+  margin-top: 44px;
+  padding: 26px 0 40px;
+  border-top: 1px solid var(--border);
+}
+
+.footerInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 18px;
+}
+
+.footerLinks a {
+  font-size: 13px;
+  color: var(--ink2);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footerLinks a:hover {
+  color: var(--ink);
+}
+
+.disclaimer {
+  font-size: 12.5px;
+  color: var(--inkMuted);
+  max-width: 340px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+@media (max-width: 520px) {
+  .h1 {
+    font-size: 26px;
+  }
+  .countdownNum {
+    font-size: 22px;
+  }
+  .ledgerName {
+    font-size: 14px;
+  }
+}
