@@ -18,6 +18,28 @@ export type ElectoralList = {
   lastSeenAt: string;
 };
 
+export type NewsSource = "N1" | "NOVA" | "BLIC" | "INFORMER";
+
+export type NewsArticle = {
+  id: number;
+  source: NewsSource;
+  title: string;
+  description: string | null;
+  url: string;
+  imageUrl: string | null;
+  publishedAt: string;
+  fetchedAt: string;
+};
+
+type PageResponse<T> = {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+};
+
 async function apiFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     next: { revalidate: 60 },
@@ -34,4 +56,9 @@ export function getCurrentElection() {
 
 export function getCurrentElectoralLists() {
   return apiFetch<ElectoralList[]>("/api/v1/elections/current/lists");
+}
+
+export async function getNewsBySource(source: NewsSource, size = 5) {
+  const page = await apiFetch<PageResponse<NewsArticle>>(`/api/v1/news?source=${source}&size=${size}`);
+  return page.content;
 }

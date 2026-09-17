@@ -1,16 +1,23 @@
 import styles from "./page.module.css";
-import { getCurrentElection, getCurrentElectoralLists } from "@/lib/api";
+import { getCurrentElection, getCurrentElectoralLists, getNewsBySource, type NewsSource } from "@/lib/api";
 import { formatDateSr, formatRelativeSr } from "@/lib/format";
-import { PLACEHOLDER_NEWS_ROWS } from "@/lib/placeholderNews";
 import Countdown from "@/components/Countdown";
 import ElectoralListsPaginated from "@/components/ElectoralListsPaginated";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 
+const NEWS_SOURCES: { key: NewsSource; label: string }[] = [
+  { key: "N1", label: "N1" },
+  { key: "NOVA", label: "Nova.rs" },
+  { key: "BLIC", label: "Blic" },
+  { key: "INFORMER", label: "Informer" },
+];
+
 export default async function Home() {
-  const [election, lists] = await Promise.all([
+  const [election, lists, newsBySource] = await Promise.all([
     getCurrentElection(),
     getCurrentElectoralLists(),
+    Promise.all(NEWS_SOURCES.map((s) => getNewsBySource(s.key))),
   ]);
 
   const targetIso = `${election.electionDate}T07:00:00+02:00`;
@@ -18,6 +25,12 @@ export default async function Home() {
     if (!latest || list.lastSeenAt > latest) return list.lastSeenAt;
     return latest;
   }, null);
+
+  // Backend keeps the latest 5 per source; only 4 are shown to fill the fixed 4-column row.
+  const newsRows = NEWS_SOURCES.map((s, i) => ({
+    source: s.label,
+    items: newsBySource[i].slice(0, 4),
+  })).filter((row) => row.items.length > 0);
 
   return (
     <div className={styles.page}>
@@ -67,37 +80,39 @@ export default async function Home() {
         </div>
       </div>
 
-      <main className={styles.wrap}>
-        <section className={styles.newsSection}>
-          <div className={styles.newsHead}>
-            <h2>Вести о изборима</h2>
-            <p>Најновији текстови из медија који прате изборе — водимо вас на изворни сајт.</p>
-          </div>
-          <div className={styles.newsRows}>
-            {PLACEHOLDER_NEWS_ROWS.map((row) => (
-              <div className={styles.newsRow} key={row.source}>
-                <div className={styles.newsRowLabel}>{row.source}</div>
-                {row.items.map((item) => (
-                  <a
-                    className={styles.newsCard}
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    key={item.url}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className={styles.newsCardImg} src={item.image} alt="" loading="lazy" />
-                    <span className={styles.newsCardBody}>
-                      <span className={styles.newsCardTitle}>{item.title}</span>
-                      <span className={styles.newsCardCat}>Политика</span>
-                    </span>
-                  </a>
-                ))}
-              </div>
-            ))}
-          </div>
-        </section>
-      </main>
+      {newsRows.length > 0 && (
+        <main className={styles.wrap}>
+          <section className={styles.newsSection}>
+            <div className={styles.newsHead}>
+              <h2>Вести о изборима</h2>
+              <p>Најновији текстови из медија који прате изборе — водимо вас на изворни сајт.</p>
+            </div>
+            <div className={styles.newsRows}>
+              {newsRows.map((row) => (
+                <div className={styles.newsRow} key={row.source}>
+                  <div className={styles.newsRowLabel}>{row.source}</div>
+                  {row.items.map((item) => (
+                    <a
+                      className={styles.newsCard}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      key={item.url}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img className={styles.newsCardImg} src={item.imageUrl ?? ""} alt="" loading="lazy" />
+                      <span className={styles.newsCardBody}>
+                        <span className={styles.newsCardTitle}>{item.title}</span>
+                        <span className={styles.newsCardCat}>Политика</span>
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </section>
+        </main>
+      )}
 
       <SiteFooter />
     </div>
