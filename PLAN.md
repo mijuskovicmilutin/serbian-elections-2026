@@ -1,12 +1,12 @@
 # Serbia Elections 2026 — Project Plan
 
-Status: draft plan, reviewed 2026-09-16. Implementacija ide milestone po milestone (ne generisati sve odjednom).
+Status: plan, reviewed 2026-09-16, dopunjen 2026-09-21 (V3: Polymarket kartica, ankete, novi raspored početne). Implementacija ide milestone po milestone (ne generisati sve odjednom).
 
 ## 1. Cilj
 
 Javni, neutralni informacioni portal za parlamentarne izbore u Srbiji 2026 (izbori raspisani za 25. oktobar 2026). Sajt agregira i strukturirano prikazuje podatke iz jasno označenih izvora — ne proizvodi političke procene niti rangira opcije.
 
-Izvori: RIK (izborni podaci, izborne liste), političke rubrike medija (vesti), agencije za istraživanje javnog mnjenja, prediction-market podaci (Polymarket i sl., jasno odvojeni od anketa).
+Izvori: RIK (izborni podaci, izborne liste), političke rubrike medija (vesti), agencije za istraživanje javnog mnjenja (CRTA, Faktor Plus, CeSID; svaka anketa se ručno pregleda i odobri pre objave), prediction-market podaci (Polymarket i sl., jasno odvojeni od anketa).
 
 Za svaki podatak čuvamo i prikazujemo izvor, originalni URL i vreme poslednjeg ažuriranja.
 
@@ -66,11 +66,66 @@ API: `GET /api/v1/news` sa `?source=`, `?page=`, `&size=`. UI: sekcija na homepa
 
 ## V3 — Polls + Prediction Markets + Timeline
 
-Polls: `poll` (pollster, title, published_at, fieldwork_from/to, sample_size, methodology, population, source_url) + `poll_result` (poll_id, electoral_list_id, label, percentage). Ne računamo sopstveni "polling score"; kasnije eventualno istorijski chart iz objavljenih istraživanja (ne prognoza).
+Mockupi za sve što je u ovoj sekciji su u Claude Design canvasu "Izbori 2026 – Ankete" (https://claude.ai/artifact/3sgSQ6pKLbxNeeCQhUP8Q9): ekran 1 (sekcija Istraživanja na početnoj), 2 (`/istrazivanja`), 3 (admin pregled), 4 i 5 (novi raspored početne, široki i uži ekran). Polymarket kartica ima svoj canvas (https://claude.ai/artifact/64GCv3fcTZyqy2KsrHbg7r).
 
-Prediction markets: potpuno odvojen modul od polls, sa eksplicitnom UI napomenom "Market prices are not polling data". `prediction_market` (provider, market_name, source_url, updated_at) + `prediction_market_outcome` (market_id, name, price, updated_at). API > scraping kad god provider ima API.
+### V3.0 Prediction markets — implementirano (2026-09-20)
 
-Timeline: `election_event` (election_id, type, title, description, event_date, source_url) — vizuelna timeline ključnih datuma (raspisivanje, predaja/proglašenje lista, izborni dan).
+Potpuno odvojen modul od polls, sa eksplicitnom UI napomenom "Cene tržišta nisu podaci iz anketa". API > scraping kad god provider ima API.
+
+- **Izvor:** Polymarket Gamma API (`/events?slug=...`, događaj "Next Prime Minister of Serbia?") + CLOB API (`/prices-history`) za istoriju cena. Uvoz na 15 min (`PolymarketImportJob`). Placeholder slotovi bez prometa ("Person C", cena 0.50) se izbacuju u `PolymarketNormalizer`.
+- **Model (V6 + V7):** `prediction_market` (provider, external_id, market_name, source_url, updated_at, volume, end_date) + `prediction_market_outcome` (name, price, image_url, volume, one_day_price_change, best_ask, best_bid, price_history). `price_history` je kompaktan JSON (TEXT) i čuva se samo za dva vodeća ishoda (`polymarket.history-outcomes=2`, `history-fidelity-minutes=720`). Neuspeh dobavljanja istorije ne obara uvoz.
+- **API:** `GET /api/v1/prediction-markets/current`; `yesPrice` = best ask, `noPrice` = 1 − best bid.
+- **UI:** posebna kartica (naslov, trobojna ikona, grafik oba vodeća ishoda, ukupni promet i datum zatvaranja, redovi 1 i 2 sa slikom, procentom, promenom za 24h i cenama Yes/No koje vode na Polymarket, napomena da to nisu ankete). Nema "Buy" poziva na kupovinu.
+- **Namerno bez državnog grba:** ikona događaja na Polymarketu sadrži grb, mi ga ne prikazujemo (portal ne sme da liči na zvaničan državni sajt). Umesto toga trobojka (crvena, plava, bela).
+
+### Ankete (polls) — dizajn dogovoren 2026-09-21, nije implementirano (milestone-i V3.2–V3.6)
+
+**Princip:** ne uniformišemo izvorne podatke, uniformišemo naš model i prikaz, a izvorne vrednosti čuvamo. Tačnost je važnija od automatizacije: ankete izlaze nekoliko puta mesečno, pa je greška u parsiranju (npr. "među opredeljenima" pročitano kao "svi ispitanici") skuplja od ručnog unosa.
+
+**Izvori (whitelist, ne "svaka anketa na internetu"):**
+- **CRTA** (primarni izvor, `crta.rs`): robots.txt otvoren, ali stranica je vratila 403 na automatski zahtev — ne oslanjati se na scraping, nego na praćenje objava + ručni unos.
+- **Faktor Plus** (sekundarni izvor): sajt blokira automatski pristup (robots.txt "Not Acceptable"). Rezultate prenose Danas, RTS, Tanjug i drugi mediji; anketa se vodi kao *sekundarni izvor* sa navedenim medijima.
+- **CeSID:** njihova stranica "istraživanja" ne sadrži redovne ankete o glasačkim namerama (poslednje stavke su o EU integracijama i mladima, nema RSS-a). Ostaje na listi izvora sa praznim stanjem ("još nema objavljenog istraživanja"), bez očekivanja automatskog toka.
+- Agregatori (npr. `rejtingpolitickihstranaka.rs`) se koriste najviše kao cross-check, ne kao izvor. BIRODI je model procene rezultata, ne anketa, i ne prikazuje se.
+- Novi izvor se dodaje tek kad objavljuje dovoljno metapodataka: ko je sproveo, kada, na kome i šta procenat predstavlja.
+- **Pravilo objave:** ne prikazuje se anketa ako ne možemo pouzdano utvrditi agenciju, period, na šta se procenti odnose i izvor (primarni/sekundarni). Ostala polja mogu biti nepoznata, ali se to jasno pokazuje.
+
+**Tok (hibrid, objava je uvek ručna):**
+`DISCOVERED` (nađena nova objava, samo naslov/datum/link) → `DRAFT` (izvučene vrednosti, najbolji pokušaj ili ručni unos) → `APPROVED` / `REJECTED`. Javni API vraća isključivo `APPROVED`. Automatika je samo otkrivanje i pokušaj izvlačenja, odobrava uvek čovek. Izvor: `Polls*Provider` po agenciji (praćenje objava), sa ručnim unosom kao normalnim putem.
+
+**Model (Flyway migracije):**
+- `pollster`: id, name, kind (PRIMARY/SECONDARY_VIA_MEDIA), website, discovery_url, active.
+- `poll`: id, pollster_id, title, published_at, fieldwork_from, fieldwork_to (opciono), fieldwork_note (npr. "avgust–septembar 2026."), sample_size, population, method, conducted_by, commissioned_by, margin_of_error, result_basis (ALL_RESPONDENTS / LIKELY_VOTERS / DECIDED_VOTERS / OTHER), decided_share_pct, undecided_pct, wont_vote_pct, will_vote_pct, source_kind (PRIMARY/SECONDARY), source_url, original_document_url, media_sources (JSON), status, reviewed_at, review_note, scraped_at, content_hash, source_snapshot, created_at, modified_at.
+- `poll_result`: id, poll_id, `raw_option_name` (tačno kako je objavljeno, nikad ne menjamo), percentage, display_order (redosled iz izvora), option_kind (PARTY / COALITION / ELECTORAL_LIST / UNSPECIFIED), composition (partneri, tekst iz izvora), electoral_list_id (opciono, samo kad je povezivanje jasno; predlog mora da se potvrdi).
+- Puna tabela `political_option` + članovi se ne uvodi u prvoj verziji.
+- **Odluka o prikazu koalicija:** `option_kind` i `composition` se čuvaju kao interna evidencija, a javno se **ne prikazuju** (oznake "+ k", "(?)" i beleške ispod kartice su testirane u mockupu i ocenjene kao nepregledne). Poznat rizik: "SNS" u jednoj anketi može biti sama stranka, a u drugoj sa koalicionim partnerima; javno to nose samo nazivi opcija iz izvora. Ako se odluka promeni, podatak je već u bazi.
+
+**Uniforman prikaz (svako istraživanje isto):**
+- Ista kartica bez obzira na izvor. Fiksnih 12 polja u istom redosledu: Teren (period), Uzorak, Metod / Populacija, Margina greške, Naručilac / Udeo opredeljenih u uzorku, Neopredeljeni, Neće glasati / Izjasnilo se da će glasati, Originalni izveštaj, Medijski prenos. Polje koje izvor ne navodi ostaje na istom mestu, sivo, sa istim tekstom "Nije navedeno u izvoru".
+- Traka "Među opredeljenim biračima" (ili odgovarajuća osnova rezultata) i oznaka primarni/sekundarni izvor u zaglavlju.
+- Trake sve iste boje (bez boja stranaka), skala 0–100%, opcije redosledom iz izvora, bez sortiranja i bez izdvajanja pobednika.
+- Ne računamo sopstveni prosek ni "polling score". Zajednički grafik tek kasnije: samo istorija jedne agencije sa istom osnovom rezultata, nikad linija kroz nesaporedive ankete.
+- Ne kopiramo tuđe grafikone ni PDF-ove, samo brojeve uz link na izvor.
+
+**API:** javno `GET /api/v1/polls` (`?pollster=`, `?page=`, `&size=`, samo APPROVED), `GET /api/v1/polls/{id}`, `GET /api/v1/pollsters` (sa brojem odobrenih). Interno (zaštićeno tajnim ključem): `GET /internal/polls?status=`, `PATCH /internal/polls/{id}`, `POST /internal/polls/{id}/approve`, `.../reject`.
+
+**Admin pregled (izuzetak od "bez admin panela"):** skrivena stranica `/admin/istrazivanja` (noindex), zaštićena jednim tajnim ključem iz env varijable (`ADMIN_API_KEY`), bez naloga i korisnika. Levo: tabovi Na čekanju / Odobrena / Odbijena, praćeni izvori sa stanjem (npr. "sajt blokira automatski pristup, prati se preko medija"), tok statusa. U sredini: forma sa svim poljima ankete (nepoznato polje je označeno), redovi rezultata (naziv kao u izvoru, procenat, interna oznaka opcije i partneri, opciono povezivanje sa RIK listom), provera zbira (npr. 97,6% za osnovu "opredeljeni" je upozorenje koje ne blokira objavu), lista uslova za objavu i dugmad Odbij / Sačuvaj nacrt / Odobri i objavi. Desno: izvor sa linkom, vreme preuzimanja, otisak sadržaja i istaknute izvučene vrednosti. Izmene posle objave ostavljaju zapis.
+
+**Izborna tišina (pravna provera pre objave!):** verovatno postoji zabrana objavljivanja rezultata anketa neposredno pred izbore i na izborni dan; tačno pravilo nije potvrđeno i mora ga proveriti neko pravno kompetentan (ili pravila RIK-a) pre nego što se ankete objave. Ugraditi prekidač u konfiguraciji koji automatski sakriva ankete (i razmotriti predikciono tržište) u podesivom periodu, sa napomenom na mestu kartice.
+
+**Homepage i stranice:** kartica "Istraživanja javnog mnjenja" na početnoj (najnovije istraživanje svake agencije, po datumu objave, prva tri rezultata, link "Još N opcija u detaljima" i "Sva istraživanja"), stranica `/istrazivanja` (filter po agenciji sa brojevima, npr. CeSID (0), grupisanje po mesecima, pune kartice, napomena da rezultati nisu direktno uporedivi).
+
+### Timeline (milestone V3.7)
+
+`election_event` (election_id, type, title, description, event_date, source_url) — vizuelna timeline ključnih datuma (raspisivanje, predaja/proglašenje lista, izborni dan).
+
+## Raspored početne strane (dogovoreno 2026-09-21)
+
+Redosled odozgo: zaglavlje, hero sa odbrojavanjem, zatim, preko fotografije Skupštine, kartice **Izborne liste** i **Istraživanja javnog mnjenja**; ispod njih tamna sekcija **Vesti o izborima** i u njoj **Predikciono tržište**; na kraju podnožje.
+- **Liste + istraživanja:** jedno pored drugog kad ima mesta (oko 1200px i više, svaka kartica bar ~560px), inače istraživanja ispod listi. Kartice su bele.
+- **Predikciono tržište** se premešta iz hero dela ispod vesti (trenutno je ispod izbornih lista). Kartica je tamna (`#1B211F`, okvir `#2B322D`), kao kartice vesti, i zauzima širinu sadržaja (760px). Grafik se skalira na širinu kartice.
+- **Tamna boja** sekcije vesti (`#14181A`) ide bez prekida do dna stranice, uključujući podnožje ("O portalu", "Izvori", napomena da portal nije zvaničan). Tamna paleta u ovom delu je fiksna (ne zavisi od teme), za razliku od ostatka koji sada prati `prefers-color-scheme`; potvrditi pri implementaciji.
+- Mobilni prikaz: sve u jednoj koloni istim redosledom.
 
 ## V4 — Deployment
 
@@ -96,24 +151,35 @@ Timeline: `election_event` (election_id, type, title, description, event_date, s
 
 ## Namerno NE radimo
 
-Microservices, Kafka, Redis u V1, Kubernetes, authentication, user accounts, comments, admin panel u V1, GraphQL, WebSockets, AI-generated political summaries, AI ranking stranaka, AI prediction pobednika.
+Microservices, Kafka, Redis u V1, Kubernetes, authentication, user accounts, comments, admin panel u V1 (jedini izuzetak je mala skrivena stranica za pregled anketa u V3, zaštićena tajnim ključem, bez naloga), GraphQL, WebSockets, AI-generated political summaries, AI ranking stranaka, AI prediction pobednika, prikaz državnog grba ili zvaničnog izgleda, automatsko objavljivanje anketa bez ručnog odobrenja, sopstveni prosek/rejting iz anketa.
 
 ## Milestones
 
-V1.0 skeleton → V1.1 Postgres+Flyway → V1.2 RIK integration → V1.3 election REST API → V1.4 countdown UI → V1.5 electoral lists UI → V1.6 responsive+SEO → V2.0-2.4 news → V3.0-3.5 polls/markets/timeline/final dashboard → **V4.0 production deploy (domen + Vercel + Render + plaćeni Postgres)**.
+V1.0 skeleton → V1.1 Postgres+Flyway → V1.2 RIK integration → V1.3 election REST API → V1.4 countdown UI → V1.5 electoral lists UI → V1.6 responsive+SEO → V2.0-2.4 news → V3.0 prediction markets → V3.1 raspored početne (relayout) → V3.2 polls backend → V3.3 polls admin pregled → V3.4 polls discovery/izvlačenje → V3.5 polls FE (početna + `/istrazivanja`) → V3.6 prekidač izborne tišine (posle pravne provere) → V3.7 timeline + završni dashboard → **V4.0 production deploy (domen + Vercel + Render + plaćeni Postgres)**.
 
-V1.0-V1.6 su gotovi (FE+BE, lokalno testirano). Sledeći korak: V2 News Aggregator.
+**Status (2026-09-21):** gotovi V1.0–V1.6, V2 (vesti, sa logotipima portala na početnoj), V3.0 (Polymarket) i V3.1 (relayout početne). Sledeći korak: V3.2 (model i API anketa).
+
+- **V3.1 relayout (gotovo):** samo FE. Polymarket je premešten ispod vesti i postao tamna kartica (boje iz CSS promenljivih), tamna sekcija (`.darkArea`, fiksna paleta) ide do dna zajedno sa podnožjem. Red kartica u hero delu je `flex` sa prelamanjem (`flex: 1 1 560px`, max 760px): jedna kartica (liste) je široka 760px, a kad se doda karta istraživanja stajaće jedna pored druge od oko 1200px, inače jedna ispod druge (proveren u pregledaču simulacijom druge kartice). Namerno nije dodat prazan slot za istraživanja dok ne postoji backend.
+- **V3.2 polls backend:** Flyway migracije, entiteti, seed za `pollster` (CRTA, Faktor Plus, CeSID), javni API (samo APPROVED), unit + integracioni testovi.
+- **V3.3 admin pregled:** interni endpointi + `/admin/istrazivanja`, tajni ključ, noindex, zapis izmena posle objave.
+- **V3.4 discovery:** praćenje objava po agenciji, `DISCOVERED` kandidati, pokušaj izvlačenja brojeva; ručni unos je puni put. Poštovati robots.txt i ne opterećivati izvore.
+- **V3.5 polls FE:** kartica na početnoj i `/istrazivanja` prema mockupu (ista kartica i ista polja za sve).
+- **V3.6 izborna tišina:** konfigurabilan prekidač koji sakriva ankete; uključiti tek posle pravne provere.
 
 ## Review napomene (2026-09-16)
 
 - Verzije potvrđene: Spring Boot 4.1.1 je zaista trenutna stabilna verzija (izašla avgust 2026, spring.io). Next.js je na 16.3 kao najnovijoj minor verziji (App Router je default). Oba izbora su validna i aktuelna.
 - RIK nema javno vidljiv REST/open-data API — samo web stranice (npr. `rik.parlament.gov.rs/zapisnici/...`). Jsoup scraping pristup je opravdan, ali HTML struktura nije garantovano stabilna — otud opravdano insistiranje na HTML fixture testovima za parser i na `data_import` audit tabeli.
-- Polymarket za ovu konkretnu izbornu trku je neizvesno u V3 obliku koji plan predviđa: postoje Polymarket tržišta vezana za Srbiju (npr. "will parliamentary election be called before 2027", predsednik/premijer predictions), ali nije potvrđeno postojanje tržišta sa kvotama po izbornoj listi/stranci za parlamentarne izbore 25. oktobra 2026. Ovo treba proveriti neposredno pre V3 rada na prediction markets modulu — moguće da model `prediction_market_outcome` treba da bude generičniji (npr. binarni ishodi umesto per-lista kvota).
+- ~~Polymarket za ovu konkretnu izbornu trku je neizvesno u V3 obliku koji plan predviđa.~~ **Rešeno (V3.0):** koristi se događaj "Next Prime Minister of Serbia?" sa ishodom po kandidatu (ne po listi), pa je model `prediction_market_outcome` generički (name, price, ...). Nema tržišta po izbornoj listi, što se i ne prikazuje.
 - ~~Pre V2 treba proveriti ToS/robots.txt za N1, Nova, Blic, Informer i da li neki od njih ima RSS.~~ **Provereno 2026-09-17: svi dozvoljavaju crawl i svi imaju RSS** — vidi detalje u sekciji V2.
 - ~~Proveriti dostupnost domena izbori.rs pre V1.1 deploy koraka.~~ **Provereno 2026-09-17: izbori.rs zauzet, srbijaizbori.rs slobodan.** Kupovina domena pomerena u V4 (vidi ispod).
 - **(Dodato) Pre RIK integracije (V1.2) proveriti robots.txt za `rik.parlament.gov.rs`.**
 - **(Dodato) Pred V4 (production deploy) razmotriti HTTP caching na public API endpoint-ima zbog odsustva auth/rate-limiting-a u V1.**
 - **(Dodato 2026-09-17) Deploy (V1.7 → preimenovano V4) pomeren na kraj, posle V2/V3 — vidi sekciju V4 i "Način rada sa Claude-om".**
+- **(Provereno 2026-09-21) Izvori anketa:** CRTA — robots.txt otvoren, ali automatski zahtev vraća 403. Faktor Plus — sajt blokira automatski pristup; rezultati stižu preko medija (Danas, RTS, Tanjug). CeSID — nema redovnih anketa o glasačkim namerama, nema RSS-a. Zaključak: automatski scraping anketa nije pouzdan put; radi se otkrivanje objava + ručno odobravanje (vidi sekciju Ankete).
+- **(Provereno 2026-09-21) Činjenice iz izvora za mockup:** CRTA/DAL Stanford, terenski rad 10–24. jun 2026, licem u lice, n=2.324, među opredeljenima (70% uzorka) Studentska lista 44,9%, SNS 35,7%, SPS 3,8%; 12% neopredeljenih, 9% neće glasati. Faktor Plus, avgust–septembar 2026, n=1.200, terensko istraživanje, SNS 47,2%, studentska lista 31,5%, SPS 4,9%, proevropska koalicija 3,6%, NPS opcija 3,4%, Mi snaga naroda 2,9%, NADA 2,1%, SRS 2,0%; 31% neopredeljenih, 64% se izjasnilo da će glasati. Ovo pokazuje da se procenti odnose na različite osnove (opredeljeni birači u oba slučaja, ali različiti udeli neopredeljenih i različito imenovane opcije) — zato je osnova rezultata obavezno polje.
+- **(Otvoreno) Pravna provera izborne tišine** za objavu anketa (i razmotriti predikciono tržište) pre V3.5 objave — vidi sekciju Ankete.
+- **(Otvoreno) Odluka o prikazu koalicija:** trenutno se ne prikazuje javno (interna evidencija `option_kind`/`composition`), vidi sekciju Ankete. Preispitati ako se pokaže da korisnici pogrešno porede "SNS" iz različitih anketa.
 
 ## Način rada sa Claude-om
 

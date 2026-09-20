@@ -31,6 +31,33 @@
   }
 }
 
+.homePage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.darkArea {
+  --bg: #14181a;
+  --surface: #1b211f;
+  --surface2: #212824;
+  --ink: #e6e8e1;
+  --ink2: #abb1a5;
+  --inkMuted: #6e7469;
+  --border: #2b322d;
+  --borderStrong: #3a423a;
+  --accent: #5fbfb0;
+  --accentInk: #cdefe8;
+  --accentBg: #1d3b36;
+  flex: 1;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.predictionSection {
+  padding: 44px 0 8px;
+}
+
 .wrap {
   max-width: 760px;
   margin: 0 auto;
@@ -186,12 +213,18 @@
 }
 
 .listGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
   padding: 26px 24px 44px;
 }
 
 .listCardWrap {
-  width: 760px;
-  max-width: 100%;
+  flex: 1 1 560px;
+  min-width: 0;
+  max-width: 760px;
+  box-sizing: border-box;
   background: #ffffff;
   border-radius: 14px;
   padding: 18px 22px 22px;
@@ -199,7 +232,28 @@
 }
 
 .predictionCardWrap {
-  margin-top: 24px;
+  flex: none;
+  width: 100%;
+  max-width: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.predictionCardWrap .dividerLabel {
+  color: var(--ink);
+}
+
+.predictionCardWrap .dividerSub {
+  color: var(--ink2);
+}
+
+.predictionCardWrap .liveBadge {
+  color: #f0696d;
+}
+
+.predictionCardWrap .listBandHead {
+  border-bottom-color: var(--border);
 }
 
 .pmHeader {
@@ -214,7 +268,7 @@
   height: 68px;
   flex: none;
   border-radius: 12px;
-  border: 1px solid #d7dacf;
+  border: 1px solid var(--borderStrong);
   background: linear-gradient(#c6363c 0 33.34%, #0c4076 33.34% 66.67%, #ffffff 66.67% 100%);
 }
 
@@ -224,7 +278,7 @@
   font-size: 28px;
   line-height: 1.15;
   margin: 0;
-  color: #1b1f1c;
+  color: var(--ink);
 }
 
 .chart {
@@ -241,7 +295,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 1px dotted #c9ccc0;
+  border-top: 1px dotted var(--borderStrong);
 }
 
 .chartTick {
@@ -249,7 +303,7 @@
   left: calc(100% + 8px);
   top: -7px;
   font-size: 11px;
-  color: #5b6158;
+  color: var(--ink2);
 }
 
 .chartSvg {
@@ -265,7 +319,7 @@
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--surface);
   box-sizing: border-box;
   transform: translate(-50%, -50%);
 }
@@ -276,8 +330,8 @@
   bottom: 8px;
   font-size: 12px;
   font-weight: 600;
-  color: #3f453d;
-  background: #edefe8;
+  color: var(--ink);
+  background: var(--surface2);
   border-radius: 6px;
   padding: 4px 9px;
 }
@@ -292,7 +346,7 @@
   position: absolute;
   transform: translateX(-50%);
   font-size: 11px;
-  color: #5b6158;
+  color: var(--ink2);
 }
 
 .pmMeta {
@@ -302,7 +356,7 @@
   gap: 8px 20px;
   padding: 10px 0 16px;
   font-size: 14px;
-  color: #3f453d;
+  color: var(--ink2);
 }
 
 .pmMetaItem {
@@ -318,14 +372,14 @@
   column-gap: 14px;
   align-items: center;
   padding: 16px 0;
-  border-top: 1px solid #e3e5dd;
+  border-top: 1px solid var(--border);
 }
 
 .pmRowLeader {
   padding: 16px 12px;
   margin: 0 -12px;
   border-radius: 10px;
-  background: #eef7f2;
+  background: var(--accentBg);
   border-top-color: transparent;
 }
 
@@ -333,9 +387,9 @@
   font-family: var(--font-mono), ui-monospace, monospace;
   font-weight: 600;
   font-size: 14px;
-  color: #1b1f1c;
-  background: #f1f2ed;
-  border: 1px solid #d7dacf;
+  color: var(--ink);
+  background: var(--surface2);
+  border: 1px solid var(--borderStrong);
   border-radius: 6px;
   width: 30px;
   height: 30px;
@@ -345,7 +399,7 @@
 }
 
 .pmRowLeader .pmRank {
-  background: #ffffff;
+  background: var(--bg);
 }
 
 .pmPhoto {
@@ -354,7 +408,7 @@
   border-radius: 10px;
   object-fit: cover;
   display: block;
-  background: #e9ebe4;
+  background: var(--surface2);
 }
 
 .pmName {
@@ -379,12 +433,12 @@
   font-weight: 700;
   font-size: 18px;
   line-height: 1.25;
-  color: #1b1f1c;
+  color: var(--ink);
 }
 
 .pmVolume {
   font-size: 13px;
-  color: #5b6158;
+  color: var(--ink2);
   margin-top: 4px;
   padding-left: 18px;
 }
@@ -402,7 +456,7 @@
   font-weight: 700;
   font-size: 38px;
   line-height: 1;
-  color: #1b1f1c;
+  color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 
@@ -416,11 +470,11 @@
 }
 
 .changeUp {
-  color: #0b7a3a;
+  color: #4cc38a;
 }
 
 .changeDown {
-  color: #b42318;
+  color: #ff7a70;
 }
 
 .pmBuy {
@@ -451,13 +505,13 @@
 }
 
 .pmYes {
-  background: #dff3e6;
-  color: #0b6b34;
+  background: #123b27;
+  color: #7ee0a7;
 }
 
 .pmNo {
-  background: #fbe3e3;
-  color: #a01b1b;
+  background: #4a1616;
+  color: #ff9a94;
 }
 
 .pmYes:hover,
@@ -472,14 +526,14 @@
   flex-wrap: wrap;
   gap: 12px 16px;
   padding-top: 16px;
-  border-top: 1px solid #e3e5dd;
+  border-top: 1px solid var(--border);
 }
 
 .pmDisclaimer {
   margin: 0;
   font-size: 12.5px;
   line-height: 1.5;
-  color: #5b6158;
+  color: var(--ink2);
   max-width: 400px;
 }
 
@@ -489,17 +543,17 @@
   padding: 0 16px;
   display: inline-flex;
   align-items: center;
-  border: 1px solid #1e5e56;
+  border: 1px solid var(--accent);
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #1e5e56;
+  color: var(--accent);
   text-decoration: none;
   white-space: nowrap;
 }
 
 .pmSourceLink:hover {
-  background: #eef7f2;
+  background: var(--accentBg);
 }
 
 @media (max-width: 620px) {

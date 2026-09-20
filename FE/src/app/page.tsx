@@ -42,8 +42,10 @@ export default async function Home() {
     items: newsBySource[i].slice(0, 4),
   })).filter((row) => row.items.length > 0);
 
+  const market = predictionMarket && predictionMarket.outcomes.length > 0 ? predictionMarket : null;
+
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${styles.homePage}`}>
       <SiteHeader />
 
       <div className={styles.heroAndLists}>
@@ -89,53 +91,59 @@ export default async function Home() {
               <ElectoralListsPaginated lists={lists} />
             </div>
           </div>
-
-          {predictionMarket && predictionMarket.outcomes.length > 0 && (
-            <PredictionMarketCard market={predictionMarket} />
-          )}
         </div>
       </div>
 
-      {newsRows.length > 0 && (
-        <main className={styles.wrap}>
-          <section className={styles.newsSection}>
-            <div className={styles.newsHead}>
-              <h2>Вести о изборима</h2>
-              <p>Најновији текстови из медија који прате изборе — водимо вас на изворни сајт.</p>
-            </div>
-            <div className={styles.newsRows}>
-              {newsRows.map((row) => (
-                <div className={styles.newsRow} key={row.source}>
-                  <div className={styles.newsRowLabel}>
-                    <span className={`${styles.newsLogo} ${row.logoClass}`}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={row.logo} alt={row.source} />
-                    </span>
-                  </div>
-                  {row.items.map((item) => (
-                    <a
-                      className={styles.newsCard}
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      key={item.url}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img className={styles.newsCardImg} src={item.imageUrl ?? ""} alt="" loading="lazy" />
-                      <span className={styles.newsCardBody}>
-                        <span className={styles.newsCardTitle}>{item.title}</span>
-                        <span className={styles.newsCardCat}>Политика</span>
-                      </span>
-                    </a>
+      <div className={styles.darkArea}>
+        {(newsRows.length > 0 || market) && (
+          <main className={styles.wrap}>
+            {newsRows.length > 0 && (
+              <section className={styles.newsSection}>
+                <div className={styles.newsHead}>
+                  <h2>Вести о изборима</h2>
+                  <p>Најновији текстови из медија који прате изборе — водимо вас на изворни сајт.</p>
+                </div>
+                <div className={styles.newsRows}>
+                  {newsRows.map((row) => (
+                    <div className={styles.newsRow} key={row.source}>
+                      <div className={styles.newsRowLabel}>
+                        <span className={`${styles.newsLogo} ${row.logoClass}`}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={row.logo} alt={row.source} />
+                        </span>
+                      </div>
+                      {row.items.map((item) => (
+                        <a
+                          className={styles.newsCard}
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          key={item.url}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img className={styles.newsCardImg} src={item.imageUrl ?? ""} alt="" loading="lazy" />
+                          <span className={styles.newsCardBody}>
+                            <span className={styles.newsCardTitle}>{item.title}</span>
+                            <span className={styles.newsCardCat}>Политика</span>
+                          </span>
+                        </a>
+                      ))}
+                    </div>
                   ))}
                 </div>
-              ))}
-            </div>
-          </section>
-        </main>
-      )}
+              </section>
+            )}
 
-      <SiteFooter />
+            {market && (
+              <section className={styles.predictionSection}>
+                <PredictionMarketCard market={market} />
+              </section>
+            )}
+          </main>
+        )}
+
+        <SiteFooter />
+      </div>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import type { PredictionMarket, PredictionMarketOutcome } from "@/lib/api";
 import { formatDateSr, formatRelativeSr } from "@/lib/format";
 import PriceChart from "@/components/PriceChart";
 
-const SERIES_COLORS = ["#1e7a6e", "#d9822b"];
+const SERIES_COLORS = ["#5fbfb0", "#f0a24b"];
 const SHOWN_OUTCOMES = 2;
 
 function formatUsd(value: number): string {
