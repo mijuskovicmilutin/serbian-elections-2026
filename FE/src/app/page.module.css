@@ -613,6 +613,41 @@
   margin: 0;
 }
 
+.titleLink {
+  color: #1e5e56;
+  text-decoration: none;
+  border-bottom: 1px dotted #1e5e56;
+}
+
+.titleLink:hover {
+  border-bottom-style: solid;
+}
+
+.cardFooter {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e3e5dd;
+}
+
+.cardSourceLink {
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #1e5e56;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e5e56;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.cardSourceLink:hover {
+  background: #eef7f2;
+}
+
 .listCard {
   padding: 8px 0 4px;
 }

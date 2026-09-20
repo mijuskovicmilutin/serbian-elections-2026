@@ -13,6 +13,8 @@ import PredictionMarketCard from "@/components/PredictionMarketCard";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 
+const RIK_URL = "https://www.rik.parlament.gov.rs";
+
 const NEWS_SOURCES: { key: NewsSource; label: string; logo: string; logoClass: string }[] = [
   { key: "N1", label: "N1", logo: "/images/logos/n1.svg", logoClass: styles.logoN1 },
   { key: "NOVA", label: "Nova.rs", logo: "/images/logos/nova.svg", logoClass: styles.logoNova },
@@ -76,7 +78,11 @@ export default async function Home() {
           <div className={styles.listCardWrap}>
             <div className={styles.listBandHead}>
               <p className={styles.dividerLabel}>
-                Изборне листе са РИК.<span className={styles.liveBadge}>УЖИВО</span>
+                Изборне листе са{" "}
+                <a className={styles.titleLink} href={RIK_URL} target="_blank" rel="noopener noreferrer">
+                  РИК
+                </a>
+                <span className={styles.liveBadge}>УЖИВО</span>
               </p>
               <p className={styles.dividerSub}>Освежава се на 15 минута</p>
             </div>
@@ -89,6 +95,11 @@ export default async function Home() {
                 </span>
               </div>
               <ElectoralListsPaginated lists={lists} />
+            </div>
+            <div className={styles.cardFooter}>
+              <a className={styles.cardSourceLink} href={RIK_URL} target="_blank" rel="noopener noreferrer">
+                Погледај на РИК-у ↗
+              </a>
             </div>
           </div>
         </div>
