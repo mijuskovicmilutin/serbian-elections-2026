@@ -485,10 +485,45 @@
   display: flex;
   align-items: flex-start;
   padding-top: 2px;
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--ink);
+}
+
+.newsLogo {
+  width: 72px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.newsLogo img {
+  max-width: 52px;
+  max-height: 16px;
+  width: auto;
+  height: auto;
+  display: block;
+}
+
+.logoN1 {
+  background: #ffffff;
+  border: 1px solid #d7dacf;
+}
+
+.logoNova {
+  background: #6b1420;
+}
+
+.logoBlic {
+  background: #ffffff;
+  border: 1px solid #d7dacf;
+}
+
+.logoBlic img {
+  max-height: 22px;
+}
+
+.logoInformer {
+  background: #e6272a;
 }
 
 .newsCard {

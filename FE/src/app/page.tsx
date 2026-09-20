@@ -12,11 +12,11 @@ import ElectoralListsPaginated from "@/components/ElectoralListsPaginated";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 
-const NEWS_SOURCES: { key: NewsSource; label: string }[] = [
-  { key: "N1", label: "N1" },
-  { key: "NOVA", label: "Nova.rs" },
-  { key: "BLIC", label: "Blic" },
-  { key: "INFORMER", label: "Informer" },
+const NEWS_SOURCES: { key: NewsSource; label: string; logo: string; logoClass: string }[] = [
+  { key: "N1", label: "N1", logo: "/images/logos/n1.svg", logoClass: styles.logoN1 },
+  { key: "NOVA", label: "Nova.rs", logo: "/images/logos/nova.svg", logoClass: styles.logoNova },
+  { key: "BLIC", label: "Blic", logo: "/images/logos/blic.png", logoClass: styles.logoBlic },
+  { key: "INFORMER", label: "Informer", logo: "/images/logos/informer.png", logoClass: styles.logoInformer },
 ];
 
 export default async function Home() {
@@ -36,6 +36,8 @@ export default async function Home() {
   // Backend keeps the latest 5 per source; only 4 are shown to fill the fixed 4-column row.
   const newsRows = NEWS_SOURCES.map((s, i) => ({
     source: s.label,
+    logo: s.logo,
+    logoClass: s.logoClass,
     items: newsBySource[i].slice(0, 4),
   })).filter((row) => row.items.length > 0);
 
@@ -132,7 +134,12 @@ export default async function Home() {
             <div className={styles.newsRows}>
               {newsRows.map((row) => (
                 <div className={styles.newsRow} key={row.source}>
-                  <div className={styles.newsRowLabel}>{row.source}</div>
+                  <div className={styles.newsRowLabel}>
+                    <span className={`${styles.newsLogo} ${row.logoClass}`}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={row.logo} alt={row.source} />
+                    </span>
+                  </div>
                   {row.items.map((item) => (
                     <a
                       className={styles.newsCard}
