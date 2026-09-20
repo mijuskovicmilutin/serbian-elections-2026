@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rs.serbianelection2026.backend.ingestion.entity.ImportSource;
 import rs.serbianelection2026.backend.news.dto.NewsArticleResponse;
-import rs.serbianelection2026.backend.news.dto.PageResponse;
+import rs.serbianelection2026.backend.common.dto.PageResponse;
 import rs.serbianelection2026.backend.news.mapper.NewsArticleMapper;
 import rs.serbianelection2026.backend.news.service.NewsService;
 

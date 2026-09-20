@@ -1,4 +1,4 @@
-package rs.serbianelection2026.backend.news.dto;
+package rs.serbianelection2026.backend.common.dto;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
