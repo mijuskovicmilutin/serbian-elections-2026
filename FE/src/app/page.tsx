@@ -9,6 +9,7 @@ import {
 import { formatDateSr, formatRelativeSr } from "@/lib/format";
 import Countdown from "@/components/Countdown";
 import ElectoralListsPaginated from "@/components/ElectoralListsPaginated";
+import PredictionMarketCard from "@/components/PredictionMarketCard";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 
@@ -40,8 +41,6 @@ export default async function Home() {
     logoClass: s.logoClass,
     items: newsBySource[i].slice(0, 4),
   })).filter((row) => row.items.length > 0);
-
-  const topOutcomes = predictionMarket?.outcomes.slice(0, 2) ?? [];
 
   return (
     <div className={styles.page}>
@@ -91,35 +90,8 @@ export default async function Home() {
             </div>
           </div>
 
-          {predictionMarket && topOutcomes.length > 0 && (
-            <div className={`${styles.listCardWrap} ${styles.predictionCardWrap}`}>
-              <div className={styles.listBandHead}>
-                <p className={styles.dividerLabel}>Предикционо тржиште</p>
-                <p className={styles.dividerSub}>Polymarket</p>
-              </div>
-              <div className={styles.listCard}>
-                <h2 className={styles.predictionTitle}>{predictionMarket.marketName}</h2>
-                <div className={styles.predictionOutcomes}>
-                  {topOutcomes.map((outcome) => (
-                    <div className={styles.predictionOutcome} key={outcome.name}>
-                      <span className={styles.predictionOutcomeName}>{outcome.name}</span>
-                      <span className={styles.predictionOutcomePrice}>
-                        {Math.round(outcome.price * 100)}%
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <p className={styles.predictionDisclaimer}>Цене тржишта нису подаци из анкета.</p>
-                <a
-                  className={styles.predictionLink}
-                  href={predictionMarket.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Погледај на Polymarket ↗
-                </a>
-              </div>
-            </div>
+          {predictionMarket && predictionMarket.outcomes.length > 0 && (
+            <PredictionMarketCard market={predictionMarket} />
           )}
         </div>
       </div>

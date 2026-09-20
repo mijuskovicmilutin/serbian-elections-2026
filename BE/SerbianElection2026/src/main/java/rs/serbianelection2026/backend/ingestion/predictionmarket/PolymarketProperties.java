@@ -11,4 +11,7 @@ public class PolymarketProperties {
 
     private String baseUrl;
     private String eventSlug;
+    private String clobBaseUrl;
+    private int historyOutcomes = 2;
+    private int historyFidelityMinutes = 720;
 }

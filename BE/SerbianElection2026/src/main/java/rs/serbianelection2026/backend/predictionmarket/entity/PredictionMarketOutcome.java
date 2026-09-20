@@ -46,4 +46,23 @@ public class PredictionMarketOutcome extends AuditableEntity {
 
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    @Column(name = "image_url", length = 2048)
+    private String imageUrl;
+
+    @Column(precision = 18, scale = 2)
+    private BigDecimal volume;
+
+    @Column(name = "one_day_price_change", precision = 6, scale = 4)
+    private BigDecimal oneDayPriceChange;
+
+    @Column(name = "best_ask", precision = 6, scale = 4)
+    private BigDecimal bestAsk;
+
+    @Column(name = "best_bid", precision = 6, scale = 4)
+    private BigDecimal bestBid;
+
+    /** Compact JSON of the recent price history, kept only for the leading outcomes shown as a chart. */
+    @Column(name = "price_history")
+    private String priceHistory;
 }

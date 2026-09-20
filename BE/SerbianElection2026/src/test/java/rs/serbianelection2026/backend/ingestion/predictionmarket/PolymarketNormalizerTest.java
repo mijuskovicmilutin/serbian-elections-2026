@@ -34,6 +34,29 @@ class PolymarketNormalizerTest {
         assertThat(result.outcomes().get(0).price()).isEqualByComparingTo(new BigDecimal("0.5605"));
     }
 
+    @Test
+    void mapsVolumeImageDailyChangeBidAskAndYesTokenFromTheMarketRecord() {
+        String json = """
+                [{"id":"1","slug":"s","title":"T","volume":370756.55,"endDate":"2028-06-30T23:59:00Z","markets":[
+                  {"id":"10","groupItemTitle":"A","outcomePrices":"[\\"0.5175\\", \\"0.4825\\"]","volume":"254782.98",
+                   "image":"https://img/a.jpg","oneDayPriceChange":0.034,"bestAsk":0.523,"bestBid":0.512,
+                   "clobTokenIds":"[\\"111\\", \\"222\\"]"}]}]
+                """;
+        PolymarketEventRecord[] events = jsonMapper.readValue(json, PolymarketEventRecord[].class);
+
+        NormalizedPredictionMarket result = normalizer.normalize(events[0]);
+
+        assertThat(result.volume()).isEqualByComparingTo("370756.55");
+        assertThat(result.endDate()).isEqualTo(java.time.Instant.parse("2028-06-30T23:59:00Z"));
+        var outcome = result.outcomes().get(0);
+        assertThat(outcome.imageUrl()).isEqualTo("https://img/a.jpg");
+        assertThat(outcome.volume()).isEqualByComparingTo("254782.98");
+        assertThat(outcome.oneDayPriceChange()).isEqualByComparingTo("0.034");
+        assertThat(outcome.bestAsk()).isEqualByComparingTo("0.523");
+        assertThat(outcome.bestBid()).isEqualByComparingTo("0.512");
+        assertThat(outcome.yesTokenId()).isEqualTo("111");
+    }
+
     private String loadFixture() throws IOException {
         try (InputStream in = getClass().getResourceAsStream("/predictionmarket/next-pm-serbia-event.json")) {
             if (in == null) {

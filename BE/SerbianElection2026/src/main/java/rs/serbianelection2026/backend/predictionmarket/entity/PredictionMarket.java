@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,4 +46,10 @@ public class PredictionMarket extends AuditableEntity {
 
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    @Column(precision = 18, scale = 2)
+    private BigDecimal volume;
+
+    @Column(name = "end_date")
+    private Instant endDate;
 }

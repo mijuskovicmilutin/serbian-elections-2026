@@ -40,9 +40,20 @@ type PageResponse<T> = {
   last: boolean;
 };
 
+export type PricePoint = {
+  t: number;
+  p: number;
+};
+
 export type PredictionMarketOutcome = {
   name: string;
   price: number;
+  imageUrl: string | null;
+  volume: number | null;
+  oneDayPriceChange: number | null;
+  yesPrice: number | null;
+  noPrice: number | null;
+  priceHistory: PricePoint[] | null;
 };
 
 export type PredictionMarket = {
@@ -51,6 +62,8 @@ export type PredictionMarket = {
   marketName: string;
   sourceUrl: string;
   updatedAt: string;
+  volume: number | null;
+  endDate: string | null;
   outcomes: PredictionMarketOutcome[];
 };
 

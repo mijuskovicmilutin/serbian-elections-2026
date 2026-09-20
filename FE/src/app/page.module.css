@@ -190,85 +190,337 @@
 }
 
 .listCardWrap {
-  width: 65%;
+  width: 760px;
+  max-width: 100%;
   background: #ffffff;
   border-radius: 14px;
   padding: 18px 22px 22px;
   box-shadow: 0 16px 36px rgba(8, 18, 16, 0.25);
 }
 
-@media (min-width: 900px) {
-  .listCardWrap {
-    width: 50%;
-  }
-}
-
-@media (max-width: 520px) {
-  .listCardWrap {
-    width: calc(100% - 24px);
-  }
-}
-
 .predictionCardWrap {
-  margin-top: 16px;
+  margin-top: 24px;
 }
 
-.predictionTitle {
+.pmHeader {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 0 6px;
+}
+
+.pmFlagTile {
+  width: 68px;
+  height: 68px;
+  flex: none;
+  border-radius: 12px;
+  border: 1px solid #d7dacf;
+  background: linear-gradient(#c6363c 0 33.34%, #0c4076 33.34% 66.67%, #ffffff 66.67% 100%);
+}
+
+.pmTitle {
   font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 700;
-  font-size: 15px;
-  margin: 0 0 12px;
+  font-size: 28px;
+  line-height: 1.15;
+  margin: 0;
   color: #1b1f1c;
 }
 
-.predictionOutcomes {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 12px;
+.chart {
+  margin-top: 12px;
 }
 
-.predictionOutcome {
+.chartPlot {
+  position: relative;
+  height: 150px;
+  margin: 6px 44px 0 0;
+}
+
+.chartGrid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dotted #c9ccc0;
+}
+
+.chartTick {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: -7px;
+  font-size: 11px;
+  color: #5b6158;
+}
+
+.chartSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.chartDot {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-sizing: border-box;
+  transform: translate(-50%, -50%);
+}
+
+.chartSource {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #3f453d;
+  background: #edefe8;
+  border-radius: 6px;
+  padding: 4px 9px;
+}
+
+.chartAxis {
+  position: relative;
+  height: 22px;
+  margin: 8px 44px 0 0;
+}
+
+.chartAxis span {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #5b6158;
+}
+
+.pmMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding: 10px 0 16px;
+  font-size: 14px;
+  color: #3f453d;
+}
+
+.pmMetaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pmRow {
+  display: grid;
+  grid-template-columns: 30px 56px minmax(0, 1fr) auto auto;
+  column-gap: 14px;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 1px solid #e3e5dd;
+}
+
+.pmRowLeader {
+  padding: 16px 12px;
+  margin: 0 -12px;
+  border-radius: 10px;
+  background: #eef7f2;
+  border-top-color: transparent;
+}
+
+.pmRank {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1b1f1c;
+  background: #f1f2ed;
+  border: 1px solid #d7dacf;
+  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pmRowLeader .pmRank {
+  background: #ffffff;
+}
+
+.pmPhoto {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  display: block;
+  background: #e9ebe4;
+}
+
+.pmName {
+  min-width: 0;
+}
+
+.pmNameLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pmDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.pmNameText {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.25;
+  color: #1b1f1c;
+}
+
+.pmVolume {
+  font-size: 13px;
+  color: #5b6158;
+  margin-top: 4px;
+  padding-left: 18px;
+}
+
+.pmPct {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 128px;
+}
+
+.pmPctValue {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 1;
+  color: #1b1f1c;
+  font-variant-numeric: tabular-nums;
+}
+
+.changeUp,
+.changeDown {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.changeUp {
+  color: #0b7a3a;
+}
+
+.changeDown {
+  color: #b42318;
+}
+
+.pmBuy {
+  display: flex;
+  gap: 8px;
+}
+
+.pmYes,
+.pmNo {
+  min-height: 44px;
+  min-width: 94px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pmYes span,
+.pmNo span {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 600;
+}
+
+.pmYes {
+  background: #dff3e6;
+  color: #0b6b34;
+}
+
+.pmNo {
+  background: #fbe3e3;
+  color: #a01b1b;
+}
+
+.pmYes:hover,
+.pmNo:hover {
+  filter: brightness(0.96);
+}
+
+.pmFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #e3e5dd;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e3e5dd;
 }
 
-.predictionOutcome:last-child {
-  border-bottom: none;
-}
-
-.predictionOutcomeName {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #1b1f1c;
-}
-
-.predictionOutcomePrice {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-weight: 700;
-  font-size: 14px;
-  color: #1e5e56;
-}
-
-.predictionDisclaimer {
-  font-size: 11.5px;
-  color: #8b9088;
-  margin: 0 0 10px;
-}
-
-.predictionLink {
+.pmDisclaimer {
+  margin: 0;
   font-size: 12.5px;
+  line-height: 1.5;
+  color: #5b6158;
+  max-width: 400px;
+}
+
+.pmSourceLink {
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #1e5e56;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 600;
   color: #1e5e56;
   text-decoration: none;
+  white-space: nowrap;
 }
 
-.predictionLink:hover {
-  text-decoration: underline;
+.pmSourceLink:hover {
+  background: #eef7f2;
+}
+
+@media (max-width: 620px) {
+  .pmTitle {
+    font-size: 22px;
+  }
+  .pmRow {
+    grid-template-columns: 30px 56px minmax(0, 1fr);
+    row-gap: 12px;
+  }
+  .pmPct {
+    grid-column: 2 / -1;
+    justify-content: flex-start;
+  }
+  .pmBuy {
+    grid-column: 1 / -1;
+  }
+  .pmYes,
+  .pmNo {
+    flex: 1;
+  }
 }
 
 .listBandHead {

@@ -50,7 +50,8 @@ public class PolymarketNormalizer {
         log.info("Normalized {} traded outcome(s), skipped {} untraded/unparsable slot(s)", outcomes.size(), skipped);
 
         String sourceUrl = "https://polymarket.com/event/" + event.slug();
-        return new NormalizedPredictionMarket(event.id(), event.title(), sourceUrl, outcomes);
+        return new NormalizedPredictionMarket(
+                event.id(), event.title(), sourceUrl, event.volume(), event.endDate(), outcomes);
     }
 
     private NormalizedOutcome normalizeOutcome(PolymarketMarketRecord market) {
@@ -66,7 +67,26 @@ public class PolymarketNormalizer {
         }
 
         BigDecimal price = new BigDecimal(outcomePrices.get(0));
-        return new NormalizedOutcome(market.id(), market.groupItemTitle(), price, market.updatedAt());
+        return new NormalizedOutcome(
+                market.id(),
+                market.groupItemTitle(),
+                price,
+                market.updatedAt(),
+                market.image(),
+                volume,
+                market.oneDayPriceChange(),
+                market.bestAsk(),
+                market.bestBid(),
+                parseYesTokenId(market));
+    }
+
+    private String parseYesTokenId(PolymarketMarketRecord market) {
+        if (market.clobTokenIds() == null || market.clobTokenIds().isBlank()) {
+            return null;
+        }
+        List<String> tokenIds = objectMapper.readValue(market.clobTokenIds(), new TypeReference<List<String>>() {
+        });
+        return tokenIds.isEmpty() ? null : tokenIds.get(0);
     }
 
     private BigDecimal parseDecimal(String raw) {
