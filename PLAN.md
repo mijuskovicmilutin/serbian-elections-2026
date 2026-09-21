@@ -128,7 +128,44 @@ Redosled odozgo: zaglavlje, hero sa odbrojavanjem, zatim, preko fotografije Skup
 - **Tamna boja** sekcije vesti (`#14181A`) ide bez prekida do dna stranice, uključujući podnožje ("O portalu", "Izvori", napomena da portal nije zvaničan). Tamna paleta u ovom delu je fiksna (ne zavisi od teme), za razliku od ostatka koji sada prati `prefers-color-scheme`; potvrditi pri implementaciji.
 - Mobilni prikaz: sve u jednoj koloni istim redosledom.
 
-## V4 — Deployment
+## V4 — Izborni dan i izborna noć (Election Day Mode)
+
+**Status: dogovoreno 2026-09-21, nije početo.** Numeracija: ovo je novi V4, a raniji "V4 — Deployment" je sada **V5**. Zavisi od V3.6 (fazni model i prekidač izborne tišine): V4 ga proširuje.
+
+**Cilj:** od početka izborne tišine sajt prelazi u drugačiji režim sa drugačijim dizajnom, namenjen praćenju izbornog dana i noći. Isti principi kao ostatak portala: samo javni, označeni izvori, bez sopstvenih procena, rangiranja i prognoza; svaki podatak ima izvor, link i vreme ažuriranja.
+
+**Pravni okvir (potvrđeno iz medijskih izvora 2026-09-21, ipak proveriti sa pravnikom):** Zakon o izboru narodnih poslanika zabranjuje 48 časova pre dana glasanja i na dan glasanja do zatvaranja biračkih mesta da se u medijima i na javnim skupovima objavljuju procene rezultata izbora, javno predstavljaju kandidati i njihovi izborni programi i pozivaju birači da glasaju ili ne glasaju za određene liste. Kazne za pravna lica su 100.000–600.000 dinara. Izvori: [Danas](https://www.danas.rs/vesti/politika/izborna-tisina-kazne-zabrana/), [N1](https://n1info.rs/vesti/izbori-2023/izborna-tisina-pravila-kazne/), [Pravni portal](https://www.pravniportal.com/izborna-tisina/). Za 25. oktobar 2026. to znači da tišina počinje oko **23. oktobra u 00:00** (tačan trenutak proveriti) i traje do zatvaranja birališta u **20:00** na dan glasanja. Šta tačno spada pod "procene rezultata" (objavljene ankete? predikciono tržište?) i "javno predstavljanje kandidata" (kartica izbornih lista? vesti iz medija?) nije potvrđeno i mora da se pita pravnik pre izbora.
+
+**Faze (fazni model, jedan servis za ceo sistem):**
+- `NORMAL`: sve kao sada.
+- `SILENCE` (od početka tišine do 20:00 na dan glasanja): sakriveno je sve što bi moglo biti "procena rezultata" (ankete, predikciono tržište), a ostalo po odluci pravnika (vesti, kartica lista). Prikazuje se samo neutralno: praktične informacije, tajmer do zatvaranja birališta, rokovi, izvori. Na dan glasanja (07–20h) i **izlaznost po satima** koju objavljuje RIK.
+- `RESULTS_LIVE` (od 20:00 na dan glasanja): preliminarni rezultati RIK-a uživo.
+- `RESULTS_FINAL`: konačni rezultati i proglašenje kada ih RIK objavi.
+- Ručno pregažavanje faze iz admina (fail-safe, sa zapisom). Filtriranje se sprovodi i na **backendu** (API ne vraća ankete/tržište u tišini), ne samo na frontendu.
+
+**Sadržaj i dizajn:**
+- Drugačiji dizajn od svakodnevne početne: "uživo" tabla, tamna i kontrastna, krupni brojevi, minimalna navigacija, automatsko osvežavanje, mobilni prikaz prvo (najveći deo saobraćaja izborne noći), pristupačnost.
+- Ekrani za mockup (Claude Design, kao do sada, pre kodiranja): (1) početna u tišini, (2) izborni dan sa izlaznošću po satima, (3) izborna noć sa rezultatima, (4) mobilni prikaz sva tri.
+- **Izlaznost:** poslednji podatak, grafik po satima, izvor i vreme (RIK objavljuje izlaznost više puta tokom dana; tačne satnice proveriti).
+- **Rezultati:** po listi (redosled po broju na listiću kao RIK, ne po rezultatu), glasovi i procenat, procenat obrađenih biračkih mesta, izborni prag kao činjenična linija, mandati **samo ako ih RIK objavi** (bez sopstvene raspodele mandata). Jasno: "preliminarni rezultati, nisu konačni".
+- **Procene trećih strana** (paralelno brojanje CRTA/CeSID, exit poll) samo posle 20:00, jasno odvojeno od RIK brojeva i označeno kao procena, i samo ako pravnik potvrdi (isto načelo kao ankete naspram predikcionog tržišta).
+- Bez državnog grba i bez zvaničnog izgleda; napomena da portal nije RIK.
+
+**Podaci (V4.0 izviđanje pre bilo kog koda):** kako RIK objavljuje izlaznost i rezultate (u 2023. izlaznost tokom dana, preliminarni rezultati posle 20:00 uživo na RIK sajtu): proučiti stranice iz prethodnih izbora (struktura, format, da li postoji JSON/API), robots.txt i uslove korišćenja, pa izabrati pristup. **Uvek predvideti ručni unos iz admina kao rezervu** jer je struktura RIK stranica na izborni dan nepoznata i ne sme da zavisi jedan parser.
+
+**Model (predlog):** `turnout_snapshot` (election_id, as_of, percentage, voters_count, source_url, entry_kind AUTO/MANUAL), `result_snapshot` (election_id, as_of, counted_stations_pct, turnout_pct, source_url) + `result_line` (snapshot_id, electoral_list_id ili raw_name, votes, percentage, seats), `election_phase_override` (ili konfiguracija sa vremenima: početak tišine, otvaranje i zatvaranje birališta). Snapshot-ovi se čuvaju (istorija), API vraća najnoviji. Javno: `GET /api/v1/elections/current/phase`, `/turnout`, `/results/latest`. Interno: unos i ispravke sa zapisom, kao kod anketa.
+
+**Neopterećenost i pouzdanost (izborna noć je najveći skok saobraćaja):** kratak TTL keš (ISR/CDN, `stale-if-error`), osvežavanje na 30–60 s samo u relevantnoj fazi, statička rezerva (poslednji poznati JSON) ako BE padne, upozorenje kada je podatak stariji od N minuta, praćenje i dežurstvo.
+
+**Provera pre izbora:** "simulacioni režim" (podesivo vreme i lažni ili istorijski podaci, npr. rezultati iz 2023.) i generalna proba ~19–21. oktobra, testiranje opterećenja, zamrzavanje koda ~22. oktobra.
+
+**Milestone-i:** V4.0 izviđanje (RIK izvori, pravna pitanja, mockup ekrana) → V4.1 fazni servis + API + ručno pregažavanje (uključuje V3.6) → V4.2 početna u tišini → V4.3 izlaznost (unos + prikaz) → V4.4 rezultati (uvoz + prikaz + ručni unos) → V4.5 simulacioni režim i generalna proba → V4.6 opterećenje i pouzdanost.
+
+**Vremenski okvir (danas je 2026-09-21):** tišina počinje ~23.10. Pošto V5 (deploy) mora da bude gotov pre izbora, praktičan redosled je V3.6 do ~2.10, **V5 do ~9.10**, V4 gotov do ~18.10, proba 19–21.10, zamrzavanje 22.10.
+
+**Otvorena pitanja (za korisnika i pravnika):** (1) šta se sme prikazivati u tišini (ankete, tržište, vesti, liste); (2) tačan početak tišine; (3) prikaz procena trećih strana posle 20:00; (4) izvor rezultata samo RIK; (5) prikaz mandata; (6) ko radi ručni unos i dežura izborne noći; (7) kapacitet hostinga za skok saobraćaja; (8) da li posle izbora ostaje arhiva.
+
+## V5 — Deployment
 
 **(Izmena 2026-09-17) Deploy je namerno pomeren na kraj**, posle V2 i V3 — cela aplikacija se gradi i testira lokalno (FE :3000, BE :8080, Postgres :5432 iz `docker-compose.yml`) i tek kad je funkcionalno kompletna ide se na hosting. Domen se kupuje tek u ovom koraku, ne ranije — nema smisla plaćati zakup dok sajt nije spreman za javnost, niti vredi vrteti sajt sa domenom iz lokala (kućni internet ima dinamičku IP, treba port forwarding, nema lak https) — to je više rizika nego koristi u odnosu na to da se samo sačeka do stvarnog deploy-a.
 
@@ -156,9 +193,9 @@ Microservices, Kafka, Redis u V1, Kubernetes, authentication, user accounts, com
 
 ## Milestones
 
-V1.0 skeleton → V1.1 Postgres+Flyway → V1.2 RIK integration → V1.3 election REST API → V1.4 countdown UI → V1.5 electoral lists UI → V1.6 responsive+SEO → V2.0-2.4 news → V3.0 prediction markets → V3.1 raspored početne (relayout) → V3.2 polls backend → V3.3 polls admin pregled → V3.4 polls discovery → V3.5 polls FE (početna + `/istrazivanja`) → V3.6 prekidač izborne tišine (posle pravne provere) → V3.7 timeline → **V4.0 production deploy (domen + Vercel + Render + plaćeni Postgres)**.
+V1.0 skeleton → V1.1 Postgres+Flyway → V1.2 RIK integration → V1.3 election REST API → V1.4 countdown UI → V1.5 electoral lists UI → V1.6 responsive+SEO → V2.0-2.4 news → V3.0 prediction markets → V3.1 raspored početne (relayout) → V3.2 polls backend → V3.3 polls admin pregled → V3.4 polls discovery → V3.5 polls FE (početna + `/istrazivanja`) → V3.6 prekidač izborne tišine (posle pravne provere) → V3.7 timeline → V4.0–V4.6 izborni dan i izborna noć (vidi sekciju V4) → **V5.0 production deploy (domen + Vercel + Render + plaćeni Postgres)**.
 
-**Status (2026-09-21):** V1 i V2 gotovi, V3 gotov osim V3.6: V3.0 (Polymarket), V3.1 (relayout početne), V3.2 (model i javni API anketa), V3.3 (admin pregled), V3.4 (otkrivanje objava), V3.5 (prikaz anketa) i V3.7 (timeline). Ostaje **V3.6 (prekidač izborne tišine, posle pravne provere)** i onda V4 (deploy). **Pre objave prve prave ankete proveriti pravilo o izbornoj tišini.**
+**Status (2026-09-21):** V1 i V2 gotovi, V3 gotov osim V3.6: V3.0 (Polymarket), V3.1 (relayout početne), V3.2 (model i javni API anketa), V3.3 (admin pregled), V3.4 (otkrivanje objava), V3.5 (prikaz anketa) i V3.7 (timeline). Ostaje **V3.6 (prekidač izborne tišine, posle pravne provere)**, zatim V4 (izborna noć, vidi sekciju V4) i V5 (deploy, u praksi pre V4). **Pre objave prve prave ankete proveriti pravilo o izbornoj tišini.**
 
 - **V3.1 relayout (gotovo):** samo FE. Polymarket je premešten ispod vesti i postao tamna kartica (boje iz CSS promenljivih), tamna sekcija (`.darkArea`, fiksna paleta) ide do dna zajedno sa podnožjem. Red kartica u hero delu je `flex` sa prelamanjem (`flex: 1 1 560px`, max 760px): jedna kartica (liste) je široka 760px, a kad se doda karta istraživanja stajaće jedna pored druge od oko 1200px, inače jedna ispod druge (proveren u pregledaču simulacijom druge kartice). Namerno nije dodat prazan slot za istraživanja dok ne postoji backend.
 - **V3.2 polls backend (gotovo):** migracija `V8__add_polls.sql` (`pollster` sa seed-om CRTA / Faktor Plus / CeSID, `poll`, `poll_result`), entiteti i enum-i u `poll/`, javni read-only API: `GET /api/v1/polls` (`?pollster=<slug>`, paginacija, samo APPROVED, najnovije prvo), `GET /api/v1/polls/{id}`, `GET /api/v1/pollsters` (sa brojem odobrenih). Neodobrena anketa je za API isto što i nepostojeća (404); javni DTO ne sadrži `option_kind`, `composition`, status, belešku pregleda ni snimak izvora. Odstupanja od modela iz plana: dodato `pollster.slug` (za `?pollster=crta`), `poll.published_at` je za sada NOT NULL (otkriveni kandidati imaju datum objave), `PageResponse` premešten u `common.dto`. Testovi: mapper, servis (Mockito) i integracioni test kroz pravi HTTP i lokalnu bazu (sam pravi i briše svoje redove). Nema seed-ovanih anketa: prve idu tek kroz admin pregled (V3.3).
@@ -185,7 +222,7 @@ V1.0 skeleton → V1.1 Postgres+Flyway → V1.2 RIK integration → V1.3 electio
   - **Neutralnost u kodu:** ne sortiramo opcije, ne bojimo po strankama, ne računamo prosek. `option_kind` i `composition` se ne šalju javnim API-jem pa ih FE ni ne može prikazati.
   - **Tema:** kartica na početnoj je fiksno svetla (kao kartica lista), stranica `/istrazivanja` prati svetlu/tamnu temu (boje kroz `--p*` promenljive u `polls.module.css`).
   - **Provera:** izmenjeni fajlovi prolaze `tsc` i `eslint`, produkcioni build prolazi. U pregledaču sa privremenim anketama (obrisane): oba rasporeda početne, filter, svetla/tamna tema, mobilni prikaz bez horizontalnog skrola, prazna stanja, formatiranje perioda preko dva meseca, margine greške i procenata sa dve decimale. Nema FE unit testova (test runner još nije dodat).
-- **V3.6 izborna tišina:** konfigurabilan prekidač koji sakriva ankete; uključiti tek posle pravne provere.
+- **V3.6 izborna tišina:** fazni servis (`NORMAL` / `SILENCE`) sa podesivim početkom i krajem (početak oko 23.10. 00:00, kraj 25.10. u 20:00, vidi sekciju V4 za pravni okvir), ručno pregažavanje iz admina i filtriranje na backendu: u tišini API ne vraća ankete ni predikciono tržište, a FE na njihovom mestu prikazuje napomenu. Uključiti tek posle pravne provere šta se sme. V4 ovo proširuje.
 - **Prve dve prave ankete (2026-09-21):** CRTA / DAL Stanford (jun 2026, n=2.324, među opredeljenima) i Faktor Plus (avgust–septembar 2026, n=1.200, "odgovarali samo opredeljeni", prvi objavio Blic) uneti su i odobreni kroz admin, sa napomenom izvora. Brojevi su proveravani u sirovom tekstu članaka (Danas, N1, Nova, Informer, 021, Tanjug), imena opcija prepisana u ćirilicu po objavljenom tekstu. **Nalaze se samo u lokalnoj bazi**: za produkciju ih treba ponovo uneti kroz admin.
 - **V3.7 timeline (gotovo):** tabela `election_event` (`V10`), `GET /api/v1/elections/current/events`, sekcija "Кључни датуми" na početnoj (prva u tamnom delu): vertikalna linija, prošli datumi prigušeni, sledeći istaknut sa "за N дана", svaki datum sa izvorom. Seed: raspisivanje izbora 9. septembra (Danas), rok za prijavu glasanja u inostranstvu 3. oktobra, rok za liste sa 10.000 potpisa 4. oktobra i rok za domaće posmatrače 17. oktobra (Mondo "EUpravo zato"), dan glasanja iz `election.election_date`. Novi događaji se za sada dodaju migracijom (admin za događaje nije potreban dok ih ima malo).
 
@@ -195,17 +232,17 @@ V1.0 skeleton → V1.1 Postgres+Flyway → V1.2 RIK integration → V1.3 electio
 - RIK nema javno vidljiv REST/open-data API — samo web stranice (npr. `rik.parlament.gov.rs/zapisnici/...`). Jsoup scraping pristup je opravdan, ali HTML struktura nije garantovano stabilna — otud opravdano insistiranje na HTML fixture testovima za parser i na `data_import` audit tabeli.
 - ~~Polymarket za ovu konkretnu izbornu trku je neizvesno u V3 obliku koji plan predviđa.~~ **Rešeno (V3.0):** koristi se događaj "Next Prime Minister of Serbia?" sa ishodom po kandidatu (ne po listi), pa je model `prediction_market_outcome` generički (name, price, ...). Nema tržišta po izbornoj listi, što se i ne prikazuje.
 - ~~Pre V2 treba proveriti ToS/robots.txt za N1, Nova, Blic, Informer i da li neki od njih ima RSS.~~ **Provereno 2026-09-17: svi dozvoljavaju crawl i svi imaju RSS** — vidi detalje u sekciji V2.
-- ~~Proveriti dostupnost domena izbori.rs pre V1.1 deploy koraka.~~ **Provereno 2026-09-17: izbori.rs zauzet, srbijaizbori.rs slobodan.** Kupovina domena pomerena u V4 (vidi ispod).
+- ~~Proveriti dostupnost domena izbori.rs pre V1.1 deploy koraka.~~ **Provereno 2026-09-17: izbori.rs zauzet, srbijaizbori.rs slobodan.** Kupovina domena pomerena u V5 (vidi ispod).
 - **(Dodato) Pre RIK integracije (V1.2) proveriti robots.txt za `rik.parlament.gov.rs`.**
-- **(Dodato) Pred V4 (production deploy) razmotriti HTTP caching na public API endpoint-ima zbog odsustva auth/rate-limiting-a u V1.**
-- **(Dodato 2026-09-17) Deploy (V1.7 → preimenovano V4) pomeren na kraj, posle V2/V3 — vidi sekciju V4 i "Način rada sa Claude-om".**
+- **(Dodato) Pred V5 (production deploy) razmotriti HTTP caching na public API endpoint-ima zbog odsustva auth/rate-limiting-a u V1.**
+- **(Dodato 2026-09-17) Deploy (V1.7 → V4 → sada V5) pomeren na kraj, posle V2/V3 — vidi sekciju V5 i "Način rada sa Claude-om".**
 - **(Provereno 2026-09-21) Izvori anketa:** CRTA — robots.txt otvoren, ali automatski zahtev vraća 403. Faktor Plus — sajt blokira automatski pristup; rezultati stižu preko medija (Danas, RTS, Tanjug). CeSID — nema redovnih anketa o glasačkim namerama, nema RSS-a. Zaključak: automatski scraping anketa nije pouzdan put; radi se otkrivanje objava + ručno odobravanje (vidi sekciju Ankete).
 - **(Provereno 2026-09-21) Činjenice iz izvora za mockup:** CRTA/DAL Stanford, terenski rad 10–24. jun 2026, licem u lice, n=2.324, među opredeljenima (70% uzorka) Studentska lista 44,9%, SNS 35,7%, SPS 3,8%; 12% neopredeljenih, 9% neće glasati. Faktor Plus, avgust–septembar 2026, n=1.200, terensko istraživanje, SNS 47,2%, studentska lista 31,5%, SPS 4,9%, proevropska koalicija 3,6%, NPS opcija 3,4%, Mi snaga naroda 2,9%, NADA 2,1%, SRS 2,0%; 31% neopredeljenih, 64% se izjasnilo da će glasati. Ovo pokazuje da se procenti odnose na različite osnove (opredeljeni birači u oba slučaja, ali različiti udeli neopredeljenih i različito imenovane opcije) — zato je osnova rezultata obavezno polje.
-- **(Otvoreno) Pravna provera izborne tišine** za objavu anketa (i razmotriti predikciono tržište) pre V3.5 objave — vidi sekciju Ankete.
+- **(Provereno 2026-09-21) Izborna tišina:** zakon zabranjuje 48 časova pre dana glasanja i do zatvaranja birališta objavljivanje "procena rezultata izbora" (detalji i izvori u sekciji V4). **Otvoreno:** da li se to odnosi na objavljene ankete i predikciono tržište, i šta još spada u tišinu; pitati pravnika pre 23.10.
 - **(Otvoreno) Odluka o prikazu koalicija:** trenutno se ne prikazuje javno (interna evidencija `option_kind`/`composition`), vidi sekciju Ankete. Preispitati ako se pokaže da korisnici pogrešno porede "SNS" iz različitih anketa.
 
 ## Način rada sa Claude-om
 
 Ovaj dokument se koristi kao project context/spec, ali implementacija ide milestone po milestone — ne generisati sve odjednom. Prvi implementacioni prompt: monorepo skeleton, Spring Boot projekat, Next.js projekat, Docker Postgres, provera da sva tri rade lokalno. Tek posle toga: model baze i RIK ingestion.
 
-**(Dodato 2026-09-17)** Cela aplikacija (V1-V3) se gradi i verifikuje lokalno pre bilo kakvog hostinga. Deploy, kupovina domena i produkcioni troškovi dolaze tek na kraju, kao V4 — vidi sekciju V4 — Deployment.
+**(Dodato 2026-09-17)** Cela aplikacija (V1-V3) se gradi i verifikuje lokalno pre bilo kakvog hostinga. Deploy, kupovina domena i produkcioni troškovi dolaze tek na kraju, kao V5 — vidi sekciju V5 — Deployment.
