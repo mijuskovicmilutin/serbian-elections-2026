@@ -55,6 +55,7 @@ public class PollMapper {
                 poll.getSourceKind().name(),
                 poll.getSourceUrl(),
                 poll.getOriginalDocumentUrl(),
+                poll.getSourceNote(),
                 parseMediaSources(poll),
                 results.stream().map(this::toResultResponse).toList());
     }
@@ -100,6 +101,7 @@ public class PollMapper {
                 poll.getSourceKind().name(),
                 poll.getSourceUrl(),
                 poll.getOriginalDocumentUrl(),
+                poll.getSourceNote(),
                 parseMediaSources(poll),
                 poll.getReviewedAt(),
                 poll.getReviewNote(),

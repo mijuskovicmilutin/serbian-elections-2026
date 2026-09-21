@@ -167,6 +167,13 @@
   color: var(--pInk);
 }
 
+.sourceNote {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--pMuted);
+  margin: 8px 0 0;
+}
+
 .sourceRow {
   display: flex;
   align-items: center;

@@ -31,6 +31,7 @@ public record PollResponse(
         String sourceKind,
         String sourceUrl,
         String originalDocumentUrl,
+        String sourceNote,
         List<MediaSourceResponse> mediaSources,
         List<PollResultResponse> results) {
 }

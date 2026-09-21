@@ -53,6 +53,7 @@ export type AdminPoll = {
   sourceKind: SourceKind;
   sourceUrl: string;
   originalDocumentUrl: string | null;
+  sourceNote: string | null;
   mediaSources: { name: string; url: string }[];
   reviewedAt: string | null;
   reviewNote: string | null;

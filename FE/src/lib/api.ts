@@ -72,6 +72,7 @@ export type Poll = {
   sourceKind: "PRIMARY" | "SECONDARY";
   sourceUrl: string;
   originalDocumentUrl: string | null;
+  sourceNote: string | null;
   mediaSources: { name: string; url: string }[];
   results: PollResult[];
 };

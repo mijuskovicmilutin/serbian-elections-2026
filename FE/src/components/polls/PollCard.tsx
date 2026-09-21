@@ -96,6 +96,7 @@ export default function PollCard({ poll }: { poll: Poll }) {
       )}
 
       <PollBars results={poll.results} />
+      {poll.sourceNote && <p className={styles.sourceNote}>Напомена извора: {poll.sourceNote}</p>}
 
       <div className={styles.cardFoot}>
         <a className={styles.link} href={poll.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14 }}>

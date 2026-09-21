@@ -29,6 +29,7 @@ public record AdminPollResponse(
         String sourceKind,
         String sourceUrl,
         String originalDocumentUrl,
+        String sourceNote,
         List<MediaSourceResponse> mediaSources,
         Instant reviewedAt,
         String reviewNote,

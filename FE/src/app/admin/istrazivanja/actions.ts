@@ -116,6 +116,7 @@ function parsePoll(formData: FormData): { ok: true; input: Record<string, unknow
       sourceKind: text(formData, "sourceKind"),
       sourceUrl: text(formData, "sourceUrl"),
       originalDocumentUrl: orNull(text(formData, "originalDocumentUrl")),
+      sourceNote: orNull(text(formData, "sourceNote")),
       mediaSources,
       results,
     },

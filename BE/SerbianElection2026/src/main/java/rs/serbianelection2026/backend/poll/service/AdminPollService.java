@@ -244,6 +244,7 @@ public class AdminPollService {
         poll.setSourceKind(in.sourceKind());
         poll.setSourceUrl(in.sourceUrl().trim());
         poll.setOriginalDocumentUrl(blankToNull(in.originalDocumentUrl()));
+        poll.setSourceNote(blankToNull(in.sourceNote()));
         poll.setMediaSources(serializeMediaSources(in.mediaSources()));
     }
 
@@ -315,6 +316,7 @@ public class AdminPollService {
         m.put("sourceKind", String.valueOf(p.getSourceKind()));
         m.put("sourceUrl", p.getSourceUrl());
         m.put("originalDocumentUrl", String.valueOf(p.getOriginalDocumentUrl()));
+        m.put("sourceNote", String.valueOf(p.getSourceNote()));
         m.put("mediaSources", String.valueOf(p.getMediaSources()));
         m.put("results", results.stream()
                 .map(r -> r.getRawOptionName() + " = " + num(r.getPercentage()) + " [" + r.getOptionKind() + "]"

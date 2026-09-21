@@ -93,6 +93,7 @@ class AdminPollApiIntegrationTest {
         b.put("sourceUrl", "https://it.example/admin-poll-" + (++counter) + "-" + System.nanoTime());
         b.put("fieldworkNote", "avgust–septembar 2026.");
         b.put("sampleSize", 1200);
+        b.put("sourceNote", "Only the parties above the threshold are listed.");
         if (complete) {
             b.put("resultBasis", "DECIDED_VOTERS");
             b.put("undecidedPct", 31);
@@ -159,6 +160,7 @@ class AdminPollApiIntegrationTest {
         assertThat(results.get(0).get("rawOptionName").asString()).isEqualTo("Second in source");
         assertThat(results.get(1).get("rawOptionName").asString()).isEqualTo("First in source");
         assertThat(publicView.body()).doesNotContain("internal partners", "composition", "optionKind");
+        assertThat(publicView.node(json).get("sourceNote").asString()).isEqualTo("Only the parties above the threshold are listed.");
 
         assertThat(admin(HttpMethod.POST, "/internal/polls/" + id + "/reject", Map.of("note", " ")).status()).isEqualTo(400);
         Resp rejected = admin(HttpMethod.POST, "/internal/polls/" + id + "/reject", Map.of("note", "Numbers do not match the source"));
@@ -177,6 +179,7 @@ class AdminPollApiIntegrationTest {
         JsonNode current = admin(HttpMethod.GET, "/internal/polls/" + id, null).node(json);
         edited.put("sourceUrl", current.get("sourceUrl").asString());
         edited.put("title", "IT admin poll, corrected title");
+        edited.put("sourceNote", "Corrected note.");
 
         Resp r = admin(HttpMethod.PUT, "/internal/polls/" + id, edited);
 
@@ -186,6 +189,7 @@ class AdminPollApiIntegrationTest {
         assertThat(detail.get("audit").get(0).get("action").asString()).isEqualTo("UPDATED");
         assertThat(detail.get("audit").get(0).get("details").asString())
                 .contains("title: IT admin poll -> IT admin poll, corrected title")
+                .contains("sourceNote: Only the parties above the threshold are listed. -> Corrected note.")
                 .doesNotContain("results:");
         assertThat(call(HttpMethod.GET, "/api/v1/polls/" + id, null, null).body()).contains("corrected title");
 

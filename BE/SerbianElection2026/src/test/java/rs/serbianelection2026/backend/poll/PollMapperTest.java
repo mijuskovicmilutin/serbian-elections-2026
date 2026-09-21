@@ -38,6 +38,7 @@ class PollMapperTest {
                 .sourceKind(SourceKind.SECONDARY)
                 .sourceUrl("https://www.danas.rs/x")
                 .mediaSources(mediaSources)
+                .sourceNote("Others fall below the threshold, says the source.")
                 .status(PollStatus.APPROVED)
                 .reviewNote("internal note")
                 .contentHash("abc")
@@ -62,6 +63,7 @@ class PollMapperTest {
                 List.of(result("СНС – Александар Вучић", "47.2", 1), result("Студентска листа", "31.5", 2)));
 
         assertThat(response.pollster().slug()).isEqualTo("faktor-plus");
+        assertThat(response.sourceNote()).isEqualTo("Others fall below the threshold, says the source.");
         assertThat(response.pollster().kind()).isEqualTo("SECONDARY_VIA_MEDIA");
         assertThat(response.resultBasis()).isEqualTo("DECIDED_VOTERS");
         assertThat(response.sourceKind()).isEqualTo("SECONDARY");

@@ -40,6 +40,7 @@ public record PollInput(
         @NotNull SourceKind sourceKind,
         @NotBlank @Size(max = 2048) @Pattern(regexp = "^https?://\\S+$", message = "must be an http(s) URL") String sourceUrl,
         @Size(max = 2048) @Pattern(regexp = "^(https?://\\S+)?$", message = "must be an http(s) URL") String originalDocumentUrl,
+        @Size(max = 1000) String sourceNote,
         @Valid @Size(max = 20) List<MediaSourceInput> mediaSources,
         @Valid @Size(max = 50) List<PollResultInput> results) {
 }

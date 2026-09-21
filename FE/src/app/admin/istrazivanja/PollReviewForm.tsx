@@ -162,6 +162,13 @@ export default function PollReviewForm({
           <Field label="Оригинални документ (линк)" wide>
             <input className={styles.input} name="originalDocumentUrl" type="url" defaultValue={poll?.originalDocumentUrl ?? ""} />
           </Field>
+          <Field
+            label="Напомена извора"
+            wide
+            hint="Шта извор сам каже о бројевима а не стоји у другим пољима, нпр. „остали не прелазе изборни праг“. Јавно се приказује."
+          >
+            <textarea className={styles.textarea} name="sourceNote" maxLength={1000} defaultValue={poll?.sourceNote ?? ""} />
+          </Field>
           <Field label="Медијски пренос" wide hint="Један по реду, у облику: Назив | линк">
             <textarea className={styles.textarea} name="mediaSources" defaultValue={media} />
           </Field>

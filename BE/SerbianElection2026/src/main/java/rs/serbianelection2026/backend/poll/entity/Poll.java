@@ -95,6 +95,10 @@ public class Poll extends AuditableEntity {
     @Column(name = "original_document_url", length = 2048)
     private String originalDocumentUrl;
 
+    /** What the source itself says about the numbers that no other field captures, e.g. "others fall below the threshold". */
+    @Column(name = "source_note", columnDefinition = "TEXT")
+    private String sourceNote;
+
     /** JSON list of {@code {"name": ..., "url": ...}} media reports about this poll. */
     @Column(name = "media_sources", columnDefinition = "TEXT")
     private String mediaSources;

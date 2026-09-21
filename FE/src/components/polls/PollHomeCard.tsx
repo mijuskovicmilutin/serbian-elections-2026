@@ -40,6 +40,7 @@ function Summary({ poll }: { poll: Poll }) {
         </div>
       )}
       <PollBars results={poll.results} limit={SHOWN_OPTIONS} />
+      {poll.sourceNote && <p className={styles.sourceNote}>Напомена извора: {poll.sourceNote}</p>}
       <div className={styles.sourceRow}>
         <span className={styles.sourceText}>
           Извор:{" "}
