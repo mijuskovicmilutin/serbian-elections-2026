@@ -1,5 +1,6 @@
 package rs.serbianelection2026.backend.poll.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,17 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
     Page<Poll> findByStatusAndPollster_SlugOrderByPublishedAtDesc(PollStatus status, String slug, Pageable pageable);
 
     @EntityGraph(attributePaths = "pollster")
+    Page<Poll> findByStatusInOrderByPublishedAtDesc(Collection<PollStatus> statuses, Pageable pageable);
+
+    @EntityGraph(attributePaths = "pollster")
+    Optional<Poll> findWithPollsterById(Long id);
+
+    @EntityGraph(attributePaths = "pollster")
     Optional<Poll> findByIdAndStatus(Long id, PollStatus status);
+
+    boolean existsByPollster_IdAndSourceUrl(Long pollsterId, String sourceUrl);
+
+    boolean existsByPollster_IdAndSourceUrlAndIdNot(Long pollsterId, String sourceUrl, Long id);
 
     @Query("select p.pollster.id as pollsterId, count(p) as pollCount from Poll p "
             + "where p.status = :status group by p.pollster.id")

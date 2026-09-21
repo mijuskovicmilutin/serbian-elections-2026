@@ -4,6 +4,8 @@ import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -25,6 +27,38 @@ public class GlobalExceptionHandler {
         log.warn("Handling MethodArgumentTypeMismatchException: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiError("BAD_REQUEST", "Invalid value for parameter '" + e.getName() + "'", Instant.now()));
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiError> handleBadRequest(BadRequestException e) {
+        log.warn("Handling BadRequestException: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiError("BAD_REQUEST", e.getMessage(), Instant.now()));
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<ApiError> handleBusinessRule(BusinessRuleException e) {
+        log.warn("Handling BusinessRuleException: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ApiError("UNPROCESSABLE", e.getMessage(), Instant.now()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException e) {
+        String details = e.getBindingResult().getFieldErrors().stream()
+                .map(f -> f.getField() + " " + f.getDefaultMessage())
+                .sorted()
+                .collect(java.util.stream.Collectors.joining("; "));
+        log.warn("Handling MethodArgumentNotValidException: {}", details);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiError("VALIDATION_ERROR", details, Instant.now()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleUnreadable(HttpMessageNotReadableException e) {
+        log.warn("Handling HttpMessageNotReadableException: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiError("BAD_REQUEST", "Malformed request body", Instant.now()));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

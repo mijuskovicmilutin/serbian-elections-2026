@@ -9,5 +9,7 @@ public interface PollResultRepository extends JpaRepository<PollResult, Long> {
 
     List<PollResult> findByPoll_IdOrderByDisplayOrderAsc(Long pollId);
 
+    void deleteByPoll_Id(Long pollId);
+
     List<PollResult> findByPoll_IdInOrderByDisplayOrderAsc(Collection<Long> pollIds);
 }
