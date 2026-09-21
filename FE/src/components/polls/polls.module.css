@@ -1,0 +1,431 @@
+/* Colors come from --p* variables so the same markup works on the white homepage card and on the themed page. */
+.lightScope {
+  --pInk: #1b1f1c;
+  --pMuted: #5b6158;
+  --pLine: #e3e5dd;
+  --pTrack: #edefe8;
+  --pAccent: #1e5e56;
+  --pTile: #f7f8f4;
+  --pBasisBg: #f4f6f1;
+  --pGray: #6e7469;
+  color: var(--pInk);
+}
+
+.themeScope {
+  --pInk: var(--ink);
+  --pMuted: var(--ink2);
+  --pLine: var(--border);
+  --pTrack: var(--surface2);
+  --pAccent: var(--accent);
+  --pTile: var(--surface2);
+  --pBasisBg: var(--surface2);
+  --pGray: var(--inkMuted);
+  color: var(--pInk);
+}
+
+.intro {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--pMuted);
+  margin: 12px 0 18px;
+}
+
+.block + .block {
+  border-top: 1px solid var(--pLine);
+  margin-top: 18px;
+  padding-top: 18px;
+}
+
+.blockHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.name {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0;
+  color: var(--pInk);
+}
+
+.chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.chipPrimary {
+  color: #0b7a3a;
+}
+
+.chipSecondary {
+  color: #a45a0f;
+}
+
+.chipBasis {
+  color: #2c5bb0;
+}
+
+.link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pAccent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.meta {
+  font-size: 12.5px;
+  color: var(--pMuted);
+  margin: 6px 0 10px;
+}
+
+.basisRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.basisDetail {
+  font-size: 12.5px;
+  color: var(--pMuted);
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(0, 250px) minmax(0, 1fr) 56px;
+  column-gap: 14px;
+  align-items: center;
+  padding: 7px 0;
+}
+
+@media (max-width: 560px) {
+  .barRow {
+    grid-template-columns: minmax(0, 1fr) 56px;
+    row-gap: 4px;
+  }
+  .barLabel {
+    grid-column: 1 / -1;
+  }
+  .barTrack {
+    grid-column: 1;
+  }
+  .barValue {
+    grid-column: 2;
+  }
+}
+
+.barLabel {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--pInk);
+}
+
+.barTrack {
+  display: block;
+  height: 10px;
+  background: var(--pTrack);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.barFill {
+  display: block;
+  height: 10px;
+  background: var(--pAccent);
+  border-radius: 5px;
+}
+
+.barValue {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: right;
+  color: var(--pInk);
+}
+
+.sourceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.sourceText {
+  font-size: 12px;
+  color: var(--pMuted);
+}
+
+.sourceText a {
+  color: var(--pAccent);
+  text-decoration: none;
+}
+
+.homeFoot {
+  border-top: 1px solid var(--pLine);
+  margin-top: 18px;
+  padding-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.homeFootNote {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--pMuted);
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+/* Full card on /istrazivanja */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--borderStrong);
+  border-radius: 14px;
+  padding: 22px 24px 20px;
+}
+
+.cardTitle {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 0;
+  color: var(--pInk);
+}
+
+.published {
+  font-size: 13px;
+  color: var(--pMuted);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px 14px;
+  margin: 16px 0;
+}
+
+@media (max-width: 720px) {
+  .facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 460px) {
+  .facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.fact {
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.factMissing {
+  background: var(--pTile);
+}
+
+.factLabel {
+  font-size: 12px;
+  color: var(--pMuted);
+  margin: 0 0 3px;
+}
+
+.factValue {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+  color: var(--pInk);
+  overflow-wrap: anywhere;
+}
+
+.factValue a {
+  color: var(--pAccent);
+  text-decoration: none;
+}
+
+.missing {
+  color: var(--pGray);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.basisBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: var(--pBasisBg);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.cardFoot {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--pLine);
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+/* /istrazivanja page */
+.pageMain {
+  padding: 44px 0 8px;
+}
+
+.pageTitle {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1.15;
+  margin: 0 0 12px;
+  color: var(--ink);
+}
+
+.pageLead {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink2);
+  margin: 0 0 8px;
+}
+
+.pageNote {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--inkMuted);
+  margin: 0 0 24px;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 16px;
+  border-radius: 22px;
+  border: 1px solid var(--borderStrong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.filterCount {
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.filterActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+.filterDisabled {
+  border-style: dashed;
+  color: var(--inkMuted);
+  background: transparent;
+}
+
+.filterNote {
+  font-size: 12.5px;
+  color: var(--inkMuted);
+  margin: 10px 0 0;
+}
+
+.monthLabel {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  margin: 34px 0 12px;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.empty {
+  background: var(--surface);
+  border: 1px solid var(--borderStrong);
+  border-radius: 12px;
+  padding: 28px 24px;
+  color: var(--ink2);
+  font-size: 15px;
+  line-height: 1.6;
+  margin-top: 28px;
+}
+
+.disclaimer {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--inkMuted);
+  margin: 26px 0 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .themeScope .chipPrimary {
+    color: #4cc38a;
+  }
+
+  .themeScope .chipSecondary {
+    color: #f0a24b;
+  }
+
+  .themeScope .chipBasis {
+    color: #8fb4ff;
+  }
+}

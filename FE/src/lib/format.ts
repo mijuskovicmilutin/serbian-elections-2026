@@ -1,4 +1,4 @@
-const MONTHS_SR = [
+export const MONTHS_SR = [
   "јануар",
   "фебруар",
   "март",

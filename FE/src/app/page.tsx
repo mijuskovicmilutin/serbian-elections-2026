@@ -3,12 +3,14 @@ import {
   getCurrentElection,
   getCurrentElectoralLists,
   getCurrentPredictionMarket,
+  getLatestPollPerPollster,
   getNewsBySource,
   type NewsSource,
 } from "@/lib/api";
 import { formatDateSr, formatRelativeSr } from "@/lib/format";
 import Countdown from "@/components/Countdown";
 import ElectoralListsPaginated from "@/components/ElectoralListsPaginated";
+import PollHomeCard from "@/components/polls/PollHomeCard";
 import PredictionMarketCard from "@/components/PredictionMarketCard";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
@@ -23,11 +25,12 @@ const NEWS_SOURCES: { key: NewsSource; label: string; logo: string; logoClass: s
 ];
 
 export default async function Home() {
-  const [election, lists, newsBySource, predictionMarket] = await Promise.all([
+  const [election, lists, newsBySource, predictionMarket, polls] = await Promise.all([
     getCurrentElection(),
     getCurrentElectoralLists(),
     Promise.all(NEWS_SOURCES.map((s) => getNewsBySource(s.key))),
     getCurrentPredictionMarket(),
+    getLatestPollPerPollster(),
   ]);
 
   const targetIso = `${election.electionDate}T07:00:00+02:00`;
@@ -102,6 +105,8 @@ export default async function Home() {
               </a>
             </div>
           </div>
+
+          {polls.length > 0 && <PollHomeCard polls={polls} />}
         </div>
       </div>
 

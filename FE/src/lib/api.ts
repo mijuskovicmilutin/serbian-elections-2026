@@ -31,7 +31,49 @@ export type NewsArticle = {
   fetchedAt: string;
 };
 
-type PageResponse<T> = {
+export type PollResult = {
+  rawOptionName: string;
+  percentage: number;
+  displayOrder: number;
+};
+
+export type PollResultBasis = "ALL_RESPONDENTS" | "LIKELY_VOTERS" | "DECIDED_VOTERS" | "OTHER";
+
+export type Poll = {
+  id: number;
+  pollster: { slug: string; name: string; kind: string };
+  title: string;
+  publishedAt: string;
+  fieldworkFrom: string | null;
+  fieldworkTo: string | null;
+  fieldworkNote: string | null;
+  sampleSize: number | null;
+  population: string | null;
+  method: string | null;
+  conductedBy: string | null;
+  commissionedBy: string | null;
+  marginOfError: number | null;
+  resultBasis: PollResultBasis | null;
+  decidedSharePct: number | null;
+  undecidedPct: number | null;
+  wontVotePct: number | null;
+  willVotePct: number | null;
+  sourceKind: "PRIMARY" | "SECONDARY";
+  sourceUrl: string;
+  originalDocumentUrl: string | null;
+  mediaSources: { name: string; url: string }[];
+  results: PollResult[];
+};
+
+export type Pollster = {
+  slug: string;
+  name: string;
+  kind: string;
+  website: string | null;
+  approvedPollCount: number;
+};
+
+export type PageResponse<T> = {
   content: T[];
   page: number;
   size: number;
@@ -100,4 +142,32 @@ export async function getCurrentPredictionMarket(): Promise<PredictionMarket | n
     return null;
   }
   return res.json() as Promise<PredictionMarket>;
+}
+
+export function getPollsters() {
+  return apiFetch<Pollster[]>("/api/v1/pollsters");
+}
+
+export function getPolls(options: { pollster?: string; page?: number; size?: number } = {}) {
+  const params = new URLSearchParams();
+  if (options.pollster) params.set("pollster", options.pollster);
+  params.set("page", String(options.page ?? 0));
+  params.set("size", String(options.size ?? 20));
+  return apiFetch<PageResponse<Poll>>(`/api/v1/polls?${params.toString()}`);
+}
+
+// Optional/supplementary section: any failure means "no polls to show", never a broken homepage.
+// Shows the newest approved poll of every pollster, newest first, so no single agency is singled out.
+export async function getLatestPollPerPollster(): Promise<Poll[]> {
+  try {
+    const pollsters = (await getPollsters()).filter((p) => p.approvedPollCount > 0);
+    const latest = await Promise.all(
+      pollsters.map(async (p) => (await getPolls({ pollster: p.slug, size: 1 })).content[0]),
+    );
+    return latest
+      .filter((poll): poll is Poll => Boolean(poll))
+      .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  } catch {
+    return [];
+  }
 }
