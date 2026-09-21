@@ -16,7 +16,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestClient;
+import java.time.Instant;
+import rs.serbianelection2026.backend.poll.entity.Poll;
+import rs.serbianelection2026.backend.poll.entity.PollStatus;
+import rs.serbianelection2026.backend.poll.entity.SourceKind;
 import rs.serbianelection2026.backend.poll.repository.PollRepository;
+import rs.serbianelection2026.backend.poll.repository.PollsterRepository;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -27,6 +32,7 @@ import tools.jackson.databind.json.JsonMapper;
             "rik.import-enabled=false",
             "news.import-enabled=false",
             "polymarket.import-enabled=false",
+            "polls.discovery.enabled=false",
             "admin.api-key=test-admin-key"
         })
 class AdminPollApiIntegrationTest {
@@ -38,6 +44,9 @@ class AdminPollApiIntegrationTest {
 
     @Autowired
     private PollRepository pollRepository;
+
+    @Autowired
+    private PollsterRepository pollsterRepository;
 
     private final JsonMapper json = JsonMapper.builder().build();
     private final List<Long> createdIds = new ArrayList<>();
@@ -233,5 +242,52 @@ class AdminPollApiIntegrationTest {
         published.get("content").forEach(p -> publishedIds.add(p.get("id").asLong()));
         assertThat(pendingIds).contains(draft).doesNotContain(approved);
         assertThat(publishedIds).contains(approved).doesNotContain(draft);
+    }
+
+    @Test
+    void aDiscoveredCandidateWaitsForReviewIsNeverPublicAndBecomesADraftWhenOpened() {
+        Poll candidate = pollRepository.save(Poll.builder()
+                .pollster(pollsterRepository.findBySlug("faktor-plus").orElseThrow())
+                .title("IT discovered candidate")
+                .publishedAt(Instant.parse("2026-09-18T10:00:00Z"))
+                .sourceKind(SourceKind.SECONDARY)
+                .sourceUrl("https://it.example/discovered-" + System.nanoTime())
+                .status(PollStatus.DISCOVERED)
+                .scrapedAt(Instant.now())
+                .contentHash("a".repeat(64))
+                .sourceSnapshot("Faktor plus: SNS bi osvojila 47,2 odsto")
+                .build());
+        createdIds.add(candidate.getId());
+        long id = candidate.getId();
+
+        assertThat(call(HttpMethod.GET, "/api/v1/polls/" + id, null, null).status()).isEqualTo(404);
+        JsonNode pending = admin(HttpMethod.GET, "/internal/polls?status=DRAFT&status=DISCOVERED&size=200", null).node(json);
+        boolean listed = false;
+        for (JsonNode p : pending.get("content")) {
+            listed |= p.get("id").asLong() == id && p.get("status").asString().equals("DISCOVERED");
+        }
+        assertThat(listed).isTrue();
+        JsonNode detail = admin(HttpMethod.GET, "/internal/polls/" + id, null).node(json);
+        assertThat(detail.get("sourceSnapshot").asString()).contains("47,2 odsto");
+        assertThat(detail.get("readiness").get("ready").asBoolean()).isFalse();
+        assertThat(admin(HttpMethod.POST, "/internal/polls/" + id + "/approve", null).status()).isEqualTo(422);
+
+        Map<String, Object> body = pollBody(true);
+        body.put("sourceUrl", candidate.getSourceUrl());
+        Resp saved = admin(HttpMethod.PUT, "/internal/polls/" + id, body);
+
+        assertThat(saved.status()).as(saved.body()).isEqualTo(200);
+        assertThat(saved.node(json).get("status").asString()).isEqualTo("DRAFT");
+        assertThat(saved.node(json).get("audit").get(0).get("details").asString()).contains("DISCOVERED -> DRAFT");
+    }
+
+    @Test
+    void pollSourceStatusListsEveryDiscoverySourceEvenBeforeItsFirstRun() {
+        JsonNode sources = admin(HttpMethod.GET, "/internal/poll-sources", null).node(json);
+
+        List<String> names = new ArrayList<>();
+        sources.forEach(s -> names.add(s.get("source").asString()));
+        assertThat(names).containsExactly("POLL_CRTA", "POLL_CESID", "POLL_MEDIA");
+        assertThat(call(HttpMethod.GET, "/internal/poll-sources", null, null).status()).isEqualTo(401);
     }
 }

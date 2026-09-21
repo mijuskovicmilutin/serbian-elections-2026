@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rs.serbianelection2026.backend.common.exception.NotFoundException;
 import rs.serbianelection2026.backend.election.entity.Election;
+import rs.serbianelection2026.backend.election.entity.ElectionEvent;
 import rs.serbianelection2026.backend.election.entity.ElectoralList;
+import rs.serbianelection2026.backend.election.repository.ElectionEventRepository;
 import rs.serbianelection2026.backend.election.repository.ElectionRepository;
 import rs.serbianelection2026.backend.election.repository.ElectoralListRepository;
 
@@ -16,10 +18,15 @@ public class ElectionService {
 
     private final ElectionRepository electionRepository;
     private final ElectoralListRepository electoralListRepository;
+    private final ElectionEventRepository electionEventRepository;
 
-    public ElectionService(ElectionRepository electionRepository, ElectoralListRepository electoralListRepository) {
+    public ElectionService(
+            ElectionRepository electionRepository,
+            ElectoralListRepository electoralListRepository,
+            ElectionEventRepository electionEventRepository) {
         this.electionRepository = electionRepository;
         this.electoralListRepository = electoralListRepository;
+        this.electionEventRepository = electionEventRepository;
     }
 
     @Transactional(readOnly = true)
@@ -45,5 +52,16 @@ public class ElectionService {
 
         log.info("Successfully fetched {} electoral list(s) for election id={}", lists.size(), election.getId());
         return lists;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ElectionEvent> getCurrentEvents() {
+        log.info("Fetching timeline events for the current election");
+
+        Election election = getCurrentElection();
+        List<ElectionEvent> events = electionEventRepository.findByElection_IdOrderByEventDateAscIdAsc(election.getId());
+
+        log.info("Successfully fetched {} timeline event(s) for election id={}", events.size(), election.getId());
+        return events;
     }
 }

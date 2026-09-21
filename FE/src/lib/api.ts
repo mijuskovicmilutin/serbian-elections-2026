@@ -18,6 +18,17 @@ export type ElectoralList = {
   lastSeenAt: string;
 };
 
+export type ElectionEventType = "CALLED" | "DEADLINE" | "ELECTION_DAY" | "OTHER";
+
+export type ElectionEvent = {
+  id: number;
+  type: ElectionEventType;
+  title: string;
+  description: string | null;
+  eventDate: string;
+  sourceUrl: string | null;
+};
+
 export type NewsSource = "N1" | "NOVA" | "BLIC" | "INFORMER";
 
 export type NewsArticle = {
@@ -167,6 +178,15 @@ export async function getLatestPollPerPollster(): Promise<Poll[]> {
     return latest
       .filter((poll): poll is Poll => Boolean(poll))
       .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  } catch {
+    return [];
+  }
+}
+
+// Optional/supplementary section: a failed request just means no timeline, not a broken homepage.
+export async function getCurrentEvents(): Promise<ElectionEvent[]> {
+  try {
+    return await apiFetch<ElectionEvent[]>("/api/v1/elections/current/events");
   } catch {
     return [];
   }

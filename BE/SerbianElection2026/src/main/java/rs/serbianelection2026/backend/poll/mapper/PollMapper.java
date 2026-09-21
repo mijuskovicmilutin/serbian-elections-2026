@@ -8,6 +8,7 @@ import rs.serbianelection2026.backend.poll.dto.AdminPollResultResponse;
 import rs.serbianelection2026.backend.poll.dto.AdminPollSummaryResponse;
 import rs.serbianelection2026.backend.poll.dto.MediaSourceResponse;
 import rs.serbianelection2026.backend.poll.dto.PollAuditEntryResponse;
+import rs.serbianelection2026.backend.poll.dto.PollSourceStatusResponse;
 import rs.serbianelection2026.backend.poll.dto.PollResponse;
 import rs.serbianelection2026.backend.poll.dto.PollResultResponse;
 import rs.serbianelection2026.backend.poll.dto.PollsterRefResponse;
@@ -16,6 +17,7 @@ import rs.serbianelection2026.backend.poll.entity.Poll;
 import rs.serbianelection2026.backend.poll.entity.PollResult;
 import rs.serbianelection2026.backend.poll.entity.Pollster;
 import rs.serbianelection2026.backend.poll.service.AdminPollService.PollDetail;
+import rs.serbianelection2026.backend.poll.service.AdminPollService.SourceStatus;
 import rs.serbianelection2026.backend.poll.service.PollReadinessEvaluator;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
@@ -109,6 +111,17 @@ public class PollMapper {
                 detail.audit().stream()
                         .map(a -> new PollAuditEntryResponse(a.getAction().name(), a.getDetails(), a.getCreatedAt()))
                         .toList());
+    }
+
+    public PollSourceStatusResponse toSourceStatus(SourceStatus s) {
+        var run = s.lastRun();
+        return new PollSourceStatusResponse(
+                s.source().name(),
+                run == null ? null : run.getStartedAt(),
+                run == null ? null : run.getStatus().name(),
+                run == null ? null : run.getRecordsFound(),
+                run == null ? null : run.getRecordsCreated(),
+                run == null ? null : run.getErrorMessage());
     }
 
     private AdminPollResultResponse toAdminResult(PollResult r) {

@@ -20,6 +20,7 @@ import rs.serbianelection2026.backend.common.dto.PageResponse;
 import rs.serbianelection2026.backend.poll.dto.AdminPollResponse;
 import rs.serbianelection2026.backend.poll.dto.AdminPollSummaryResponse;
 import rs.serbianelection2026.backend.poll.dto.PollInput;
+import rs.serbianelection2026.backend.poll.dto.PollSourceStatusResponse;
 import rs.serbianelection2026.backend.poll.dto.PollsterResponse;
 import rs.serbianelection2026.backend.poll.dto.RejectRequest;
 import rs.serbianelection2026.backend.poll.entity.Poll;
@@ -75,6 +76,11 @@ public class AdminPollController {
     @PostMapping("/polls/{id}/reject")
     public AdminPollResponse reject(@PathVariable Long id, @Valid @RequestBody RejectRequest request) {
         return pollMapper.toAdminResponse(adminPollService.reject(id, request.note()));
+    }
+
+    @GetMapping("/poll-sources")
+    public List<PollSourceStatusResponse> pollSources() {
+        return adminPollService.getDiscoverySources().stream().map(pollMapper::toSourceStatus).toList();
     }
 
     @GetMapping("/pollsters")

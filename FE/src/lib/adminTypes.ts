@@ -67,3 +67,12 @@ export type AdminPoll = {
 export type AdminPollster = { slug: string; name: string; kind: string; website: string | null; approvedPollCount: number };
 
 export type AdminPage<T> = { content: T[]; totalElements: number };
+
+export type PollSourceStatus = {
+  source: string;
+  lastRunAt: string | null;
+  status: "RUNNING" | "SUCCESS" | "FAILED" | null;
+  recordsFound: number | null;
+  recordsCreated: number | null;
+  errorMessage: string | null;
+};

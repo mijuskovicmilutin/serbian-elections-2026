@@ -18,6 +18,9 @@ import rs.serbianelection2026.backend.common.exception.BusinessRuleException;
 import rs.serbianelection2026.backend.common.exception.NotFoundException;
 import rs.serbianelection2026.backend.election.entity.ElectoralList;
 import rs.serbianelection2026.backend.election.repository.ElectoralListRepository;
+import rs.serbianelection2026.backend.ingestion.entity.DataImport;
+import rs.serbianelection2026.backend.ingestion.entity.ImportSource;
+import rs.serbianelection2026.backend.ingestion.repository.DataImportRepository;
 import rs.serbianelection2026.backend.poll.dto.MediaSourceInput;
 import rs.serbianelection2026.backend.poll.dto.PollInput;
 import rs.serbianelection2026.backend.poll.dto.PollReadiness;
@@ -48,7 +51,11 @@ public class AdminPollService {
     private final PollsterRepository pollsterRepository;
     private final PollAuditLogRepository auditLogRepository;
     private final ElectoralListRepository electoralListRepository;
+    private final DataImportRepository dataImportRepository;
     private final ObjectMapper objectMapper;
+
+    private static final List<ImportSource> DISCOVERY_SOURCES =
+            List.of(ImportSource.POLL_CRTA, ImportSource.POLL_CESID, ImportSource.POLL_MEDIA);
 
     public AdminPollService(
             PollRepository pollRepository,
@@ -56,16 +63,30 @@ public class AdminPollService {
             PollsterRepository pollsterRepository,
             PollAuditLogRepository auditLogRepository,
             ElectoralListRepository electoralListRepository,
+            DataImportRepository dataImportRepository,
             ObjectMapper objectMapper) {
         this.pollRepository = pollRepository;
         this.pollResultRepository = pollResultRepository;
         this.pollsterRepository = pollsterRepository;
         this.auditLogRepository = auditLogRepository;
         this.electoralListRepository = electoralListRepository;
+        this.dataImportRepository = dataImportRepository;
         this.objectMapper = objectMapper;
     }
 
     public record PollDetail(Poll poll, List<PollResult> results, List<PollAuditLog> audit) {
+    }
+
+    /** {@code lastRun} is null until the source has been checked once. */
+    public record SourceStatus(ImportSource source, DataImport lastRun) {
+    }
+
+    @Transactional(readOnly = true)
+    public List<SourceStatus> getDiscoverySources() {
+        return DISCOVERY_SOURCES.stream()
+                .map(source -> new SourceStatus(
+                        source, dataImportRepository.findFirstBySourceOrderByStartedAtDesc(source).orElse(null)))
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -111,12 +132,17 @@ public class AdminPollService {
         assertSourceNotTaken(pollster, input.sourceUrl(), id);
 
         Map<String, String> before = snapshot(poll, pollResultRepository.findByPoll_IdOrderByDisplayOrderAsc(id));
+        boolean wasCandidate = poll.getStatus() == PollStatus.DISCOVERED;
         applyContent(poll, pollster, input);
+        if (wasCandidate) {
+            poll.setStatus(PollStatus.DRAFT);
+        }
         poll = pollRepository.save(poll);
         List<PollResult> results = replaceResults(poll, input.results());
         Map<String, String> after = snapshot(poll, results);
 
-        String changes = diff(before, after);
+        String changes = (wasCandidate ? "status: DISCOVERED -> DRAFT (opened by reviewer)\n" : "") + diff(before, after);
+        changes = changes.strip();
         if (changes.isEmpty()) {
             log.info("Poll update changed nothing: id={}", id);
         } else {

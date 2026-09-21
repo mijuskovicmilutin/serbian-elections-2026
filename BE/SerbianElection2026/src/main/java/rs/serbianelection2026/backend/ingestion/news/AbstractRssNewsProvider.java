@@ -29,18 +29,21 @@ public abstract class AbstractRssNewsProvider implements NewsProvider {
     }
 
     @Override
-    public List<NormalizedNewsArticle> fetch() {
+    public List<RssItem> fetchAllItems() {
         log.info("Fetching {} RSS feed: {}", getSource(), feedUrl());
         String xml = restClient.get().uri(feedUrl()).retrieve().body(String.class);
         List<RssItem> items = rssFeedParser.parse(xml == null ? "" : xml);
+        return items.stream().filter(this::matches).toList();
+    }
 
-        List<NormalizedNewsArticle> result = items.stream()
-                .filter(this::matches)
-                .limit(MAX_ITEMS_PER_FETCH)
-                .map(this::toNormalized)
-                .toList();
+    @Override
+    public List<NormalizedNewsArticle> fetch() {
+        List<RssItem> items = fetchAllItems();
+
+        List<NormalizedNewsArticle> result =
+                items.stream().limit(MAX_ITEMS_PER_FETCH).map(this::toNormalized).toList();
         log.info(
-                "{} feed returned {} item(s), {} kept after filtering/capping to latest {}",
+                "{} feed returned {} matching item(s), {} kept after capping to latest {}",
                 getSource(),
                 items.size(),
                 result.size(),

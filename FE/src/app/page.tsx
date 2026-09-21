@@ -2,6 +2,7 @@ import styles from "./page.module.css";
 import {
   getCurrentElection,
   getCurrentElectoralLists,
+  getCurrentEvents,
   getCurrentPredictionMarket,
   getLatestPollPerPollster,
   getNewsBySource,
@@ -14,6 +15,7 @@ import PollHomeCard from "@/components/polls/PollHomeCard";
 import PredictionMarketCard from "@/components/PredictionMarketCard";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import Timeline from "@/components/Timeline";
 
 const RIK_URL = "https://www.rik.parlament.gov.rs";
 
@@ -25,12 +27,13 @@ const NEWS_SOURCES: { key: NewsSource; label: string; logo: string; logoClass: s
 ];
 
 export default async function Home() {
-  const [election, lists, newsBySource, predictionMarket, polls] = await Promise.all([
+  const [election, lists, newsBySource, predictionMarket, polls, events] = await Promise.all([
     getCurrentElection(),
     getCurrentElectoralLists(),
     Promise.all(NEWS_SOURCES.map((s) => getNewsBySource(s.key))),
     getCurrentPredictionMarket(),
     getLatestPollPerPollster(),
+    getCurrentEvents(),
   ]);
 
   const targetIso = `${election.electionDate}T07:00:00+02:00`;
@@ -111,8 +114,14 @@ export default async function Home() {
       </div>
 
       <div className={styles.darkArea}>
-        {(newsRows.length > 0 || market) && (
+        {(events.length > 0 || newsRows.length > 0 || market) && (
           <main className={styles.wrap}>
+            {events.length > 0 && (
+              <section className={styles.timelineSection}>
+                <Timeline events={events} />
+              </section>
+            )}
+
             {newsRows.length > 0 && (
               <section className={styles.newsSection}>
                 <div className={styles.newsHead}>

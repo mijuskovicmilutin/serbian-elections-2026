@@ -31,7 +31,8 @@ import tools.jackson.databind.json.JsonMapper;
 /** Runs against the real local Postgres (like the context test); creates and removes only its own rows. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(
-        properties = {"rik.import-enabled=false", "news.import-enabled=false", "polymarket.import-enabled=false"})
+        properties = {"rik.import-enabled=false", "news.import-enabled=false", "polymarket.import-enabled=false",
+            "polls.discovery.enabled=false"})
 class PollApiIntegrationTest {
 
     @LocalServerPort

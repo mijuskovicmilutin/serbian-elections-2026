@@ -1,5 +1,6 @@
 package rs.serbianelection2026.backend.poll.repository;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import rs.serbianelection2026.backend.poll.entity.Poll;
 import rs.serbianelection2026.backend.poll.entity.PollStatus;
+import rs.serbianelection2026.backend.poll.entity.SourceKind;
 
 public interface PollRepository extends JpaRepository<Poll, Long> {
 
@@ -28,6 +30,9 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
 
     @EntityGraph(attributePaths = "pollster")
     Optional<Poll> findByIdAndStatus(Long id, PollStatus status);
+
+    List<Poll> findByPollster_IdAndSourceKindAndStatusAndPublishedAtBetween(
+            Long pollsterId, SourceKind sourceKind, PollStatus status, Instant from, Instant to);
 
     boolean existsByPollster_IdAndSourceUrl(Long pollsterId, String sourceUrl);
 

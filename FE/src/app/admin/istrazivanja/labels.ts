@@ -55,3 +55,9 @@ export const MISSING_LABEL: Record<string, string> = {
   SOURCE: "Извор",
   RESULTS: "Бар један резултат",
 };
+
+export const SOURCE_LABEL: Record<string, string> = {
+  POLL_CRTA: "CRTA (сопствени feed)",
+  POLL_CESID: "CeSID (сопствени feed)",
+  POLL_MEDIA: "Медији (N1, Nova.rs, Blic, Informer)",
+};

@@ -6,5 +6,8 @@ public enum ImportSource {
     NOVA,
     BLIC,
     INFORMER,
-    POLYMARKET
+    POLYMARKET,
+    POLL_CRTA,
+    POLL_CESID,
+    POLL_MEDIA
 }

@@ -4,11 +4,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { adminRequest } from "@/lib/adminApi";
 import { isAdminAuthorized } from "@/lib/adminAuth";
-import type { AdminPage, AdminPoll, AdminPollSummary, AdminPollster } from "@/lib/adminTypes";
+import type { AdminPage, AdminPoll, AdminPollSummary, AdminPollster, PollSourceStatus } from "@/lib/adminTypes";
 import { getCurrentElectoralLists } from "@/lib/api";
-import { formatDateSr } from "@/lib/format";
+import { formatDateSr, formatRelativeSr } from "@/lib/format";
 import styles from "./admin.module.css";
-import { AUDIT_LABEL, STATUS_LABEL } from "./labels";
+import { AUDIT_LABEL, SOURCE_LABEL, STATUS_LABEL } from "./labels";
 import PollReviewForm from "./PollReviewForm";
 
 export const metadata: Metadata = {
@@ -58,13 +58,14 @@ export default async function AdminPollsPage({
   const errorNotice = first(params.error);
 
   const listPage = (query: string) => adminRequest<AdminPage<AdminPollSummary>>(`/internal/polls?${query}&size=100`);
-  const [pending, approved, rejected, pollsters, electoralLists, detail] = await Promise.all([
+  const [pending, approved, rejected, pollsters, electoralLists, detail, sources] = await Promise.all([
     listPage(TABS[0].query),
     listPage(TABS[1].query),
     listPage(TABS[2].query),
     adminRequest<AdminPollster[]>("/internal/pollsters"),
     getCurrentElectoralLists().catch(() => []),
     idParam && /^\d+$/.test(idParam) ? adminRequest<AdminPoll>(`/internal/polls/${idParam}`) : Promise.resolve(null),
+    adminRequest<PollSourceStatus[]>("/internal/poll-sources"),
   ]);
 
   const byTab = { pending, approved, rejected };
@@ -73,6 +74,7 @@ export default async function AdminPollsPage({
   const counts = (key: Tab) => (byTab[key].ok ? byTab[key].data.totalElements : 0);
   const pollsterList = pollsters.ok ? pollsters.data : [];
   const poll = detail && detail.ok ? detail.data : null;
+  const sourceList = sources.ok ? sources.data : [];
   const lists = electoralLists.map((l) => ({
     id: l.id,
     label: `${l.ballotNumber ?? "?"}. ${l.name.replace(/^\d+\.\s*ИЗБОРНА\s+ЛИСТА\s*/i, "").slice(0, 60)}`,
@@ -132,6 +134,31 @@ export default async function AdminPollsPage({
           </div>
 
           <div className={styles.card}>
+            <h2 className={styles.sideTitle}>Праћени извори</h2>
+            {sourceList.map((source) => {
+              const failed = source.status === "FAILED";
+              return (
+                <div className={styles.pollsterRow} key={source.source} style={{ flexDirection: "column", gap: 2 }}>
+                  <span style={{ fontWeight: 600 }}>{SOURCE_LABEL[source.source] ?? source.source}</span>
+                  <span style={{ fontSize: 12.5, color: failed ? "#a01b1b" : "#5b6158", lineHeight: 1.45 }}>
+                    {!source.lastRunAt
+                      ? "Још није проверено."
+                      : failed
+                        ? `Провера није успела ${formatRelativeSr(source.lastRunAt)}: ${source.errorMessage ?? "непозната грешка"}`
+                        : `Проверено ${formatRelativeSr(source.lastRunAt)}. ${
+                            source.recordsCreated ? `Нових кандидата: ${source.recordsCreated}.` : "Нема ништа ново."
+                          }`}
+                  </span>
+                </div>
+              );
+            })}
+            <p className={styles.sub} style={{ marginTop: 10, lineHeight: 1.45 }}>
+              Faktor Plus нема јавни feed: прати се преко медија. Бројеве увек уносите ручно, аутоматика само јавља да је
+              нешто објављено.
+            </p>
+          </div>
+
+          <div className={styles.card}>
             <h2 className={styles.sideTitle}>Агенције</h2>
             {pollsterList.map((p) => (
               <div className={styles.pollsterRow} key={p.slug}>
@@ -164,6 +191,13 @@ export default async function AdminPollsPage({
             <div className={`${styles.banner} ${styles.bannerError}`}>{backendError.message}</div>
           )}
           {detail && !detail.ok && <div className={`${styles.banner} ${styles.bannerError}`}>{detail.message}</div>}
+
+          {poll?.status === "DISCOVERED" && (
+            <div className={`${styles.banner} ${styles.bannerOk}`} style={{ background: "#fbefd9", color: "#5a3608" }}>
+              Ово је аутоматски пронађен кандидат: познати су само наслов, линк и датум. Отворите извор, унесите податке и
+              резултате, па сачувајте као нацрт.
+            </div>
+          )}
 
           {poll || isNew ? (
             <>

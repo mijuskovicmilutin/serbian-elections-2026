@@ -54,6 +54,134 @@
   color: var(--ink);
 }
 
+.timelineSection {
+  padding: 44px 0 0;
+}
+
+.timelineHead h2 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 19px;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+
+.timelineHead p {
+  font-size: 13px;
+  color: var(--inkMuted);
+  margin: 0;
+}
+
+.timelineList {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0 0 0 26px;
+  position: relative;
+}
+
+.timelineList::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--border);
+}
+
+.timelineItem {
+  position: relative;
+  padding-bottom: 22px;
+}
+
+.timelineItem:last-child {
+  padding-bottom: 0;
+}
+
+.timelineDot {
+  position: absolute;
+  left: -26px;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--borderStrong);
+  box-sizing: border-box;
+}
+
+.timelineDateRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--ink2);
+}
+
+.timelineDateRow time {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.timelineTag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--inkMuted);
+}
+
+.timelineTitle {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  margin: 4px 0 0;
+  color: var(--ink);
+}
+
+.timelineDesc {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink2);
+  margin: 4px 0 0;
+  max-width: 560px;
+}
+
+.timelineSource {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.timelineSource:hover {
+  text-decoration: underline;
+}
+
+.timelinePast .timelineTitle,
+.timelinePast .timelineDateRow time {
+  color: var(--inkMuted);
+}
+
+.timelinePast .timelineDot {
+  background: var(--borderStrong);
+}
+
+.timelineNext .timelineDot,
+.timelineToday .timelineDot {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.timelineNext .timelineTag,
+.timelineToday .timelineTag {
+  color: var(--accent);
+}
+
 .predictionSection {
   padding: 44px 0 8px;
 }
