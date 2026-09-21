@@ -3,6 +3,8 @@ package rs.serbianelection2026.backend.ingestion.rik;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -14,6 +16,9 @@ import rs.serbianelection2026.backend.ingestion.rik.dto.RikDocumentRecord;
 @Slf4j
 @Component
 public class RikParser {
+
+    /** The list number RIK assigned is the prefix of the document title, e.g. "10. ИЗБОРНА ЛИСТА ..." or "8.ИЗБОРНА ЛИСТА ...". */
+    private static final Pattern TITLE_NUMBER = Pattern.compile("^\\s*(\\d{1,3})\\s*\\.");
 
     private final RikProperties properties;
 
@@ -48,10 +53,10 @@ public class RikParser {
     private NormalizedElectoralList parseOne(RikDocumentRecord record) {
         String href = extractHref(record.extfilesLink());
         String externalId = extractExternalId(href);
-        Integer ballotNumber = parseBallotNumber(record.number());
+        String name = record.documentName() == null ? null : record.documentName().trim();
+        Integer ballotNumber = parseBallotNumber(name);
         Instant publishedAt = Instant.ofEpochSecond(Long.parseLong(record.datetime()));
         String sourceUrl = buildSourceUrl(href);
-        String name = record.documentName() == null ? null : record.documentName().trim();
         return new NormalizedElectoralList(externalId, name, ballotNumber, sourceUrl, publishedAt);
     }
 
@@ -74,20 +79,21 @@ public class RikParser {
         return segments[segments.length - 2];
     }
 
-    private Integer parseBallotNumber(String number) {
-        if (number == null) {
+    /**
+     * The number comes from the title, not from the "number" column of the RIK response: that column is
+     * just the row position in whatever order the response happens to be in, so it shifts as new lists
+     * are published and would put lists in the wrong order.
+     */
+    private Integer parseBallotNumber(String name) {
+        if (name == null) {
             return null;
         }
-        String cleaned = number.trim();
-        if (cleaned.endsWith(".")) {
-            cleaned = cleaned.substring(0, cleaned.length() - 1);
-        }
-        try {
-            return Integer.parseInt(cleaned);
-        } catch (NumberFormatException e) {
-            log.warn("Could not parse ballot number from '{}'", number);
+        Matcher matcher = TITLE_NUMBER.matcher(name);
+        if (!matcher.find()) {
+            log.warn("No list number at the start of the RIK document title: '{}'", name);
             return null;
         }
+        return Integer.valueOf(matcher.group(1));
     }
 
     private String buildSourceUrl(String href) {

@@ -77,7 +77,7 @@ export default async function AdminPollsPage({
   const sourceList = sources.ok ? sources.data : [];
   const lists = electoralLists.map((l) => ({
     id: l.id,
-    label: `${l.ballotNumber ?? "?"}. ${l.name.replace(/^\d+\.\s*ИЗБОРНА\s+ЛИСТА\s*/i, "").slice(0, 60)}`,
+    label: `${l.ballotNumber ?? "?"}. ${l.name.replace(/^\d+\.\s*ИЗБОРНА\s+ЛИСТА\s*(?:[-–]\s*)?/i, "").slice(0, 60)}`,
   }));
 
   return (

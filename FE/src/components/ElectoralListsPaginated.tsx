@@ -11,7 +11,7 @@ const PAGE_SIZE = 5;
 // The stored name is the raw official text from RIK, e.g. "4. ИЗБОРНА ЛИСТА
 // ...". The ballot number already has its own badge, so strip that leading
 // prefix for display only — the raw value in the database is untouched.
-const RAW_PREFIX = /^\d+\.\s*ИЗБОРНА\s+ЛИСТА\s*/i;
+const RAW_PREFIX = /^\d+\.\s*ИЗБОРНА\s+ЛИСТА\s*(?:[-–]\s*)?/i;
 
 function displayName(name: string): string {
   return name.replace(RAW_PREFIX, "").trim();
