@@ -16,22 +16,16 @@ function isList(option: SurveyOptionShare): boolean {
 function Bars({
   options,
   mode,
-  twoColumns,
   quiet,
   numbered,
 }: {
   options: SurveyOptionShare[];
   mode: Mode;
-  twoColumns: boolean;
   quiet?: boolean;
   numbered?: boolean;
 }) {
-  const rows = twoColumns ? Math.ceil(options.length / 2) : options.length;
   return (
-    <div
-      className={twoColumns ? styles.bars : styles.barsSingle}
-      style={twoColumns ? ({ "--rows": rows } as React.CSSProperties) : undefined}
-    >
+    <div className={styles.barsSingle}>
       {options.map((option) => {
         const value = mode === "weighted" ? option.weightedPct : option.rawPct;
         return (
@@ -57,15 +51,14 @@ function Bars({
 }
 
 /**
- * Question 1 (and on the full page also the turnout question) with the two views: every answer as it came in, and
- * the same answers recalculated to the structure of the population. The recalculated view is the default as soon
- * as the backend provides it. Options keep the ballot order, never sorted by result.
+ * Question 1 on the results page with the two views: every answer as it came in, and the same answers
+ * recalculated to the structure of the population. The recalculated view is the default as soon as the backend
+ * provides it. Options keep the ballot order, never sorted by result.
  */
-export default function SurveyResultsView({ results, variant }: { results: SurveyResults; variant: "home" | "page" }) {
+export default function SurveyResultsView({ results }: { results: SurveyResults }) {
   const [mode, setMode] = useState<Mode>(results.weightedAvailable ? "weighted" : "raw");
   const [basis, setBasis] = useState<Basis>("all");
 
-  const page = variant === "page";
   const set: SurveyShareSet = basis === "all" ? results.voteIntention.lists : results.voteIntention.likelyVoters;
   const weighting = results.weighting;
   const remaining = Math.max(0, results.minWeightedResponses - results.responseCount);
@@ -101,7 +94,7 @@ export default function SurveyResultsView({ results, variant }: { results: Surve
         )}
       </div>
 
-      {!results.weightedAvailable && page && (
+      {!results.weightedAvailable && (
         <div className={styles.lockBox}>
           Преглед по формули отвара се када стигне {results.minWeightedResponses} одговора. До тада приказујемо само
           сирове одговоре, без прерачуна.
@@ -119,7 +112,7 @@ export default function SurveyResultsView({ results, variant }: { results: Surve
         </div>
       )}
 
-      {mode === "weighted" && weighting && page && (
+      {mode === "weighted" && weighting && (
         <>
           {weighting.smallSample && (
             <div className={styles.notice}>
@@ -151,35 +144,33 @@ export default function SurveyResultsView({ results, variant }: { results: Surve
         </>
       )}
 
-      {page && (
-        <div className={styles.basis} role="group" aria-label="Основа резултата">
-          <button
-            type="button"
-            className={`${styles.pill} ${basis === "all" ? styles.pillOn : ""}`}
-            onClick={() => setBasis("all")}
-          >
-            Сви који су изабрали листу
-          </button>
-          <button
-            type="button"
-            className={`${styles.pill} ${basis === "likely" ? styles.pillOn : ""}`}
-            onClick={() => setBasis("likely")}
-          >
-            Само они који ће сигурно или вероватно изаћи
-          </button>
-        </div>
-      )}
+      <div className={styles.basis} role="group" aria-label="Основа резултата">
+        <button
+          type="button"
+          className={`${styles.pill} ${basis === "all" ? styles.pillOn : ""}`}
+          onClick={() => setBasis("all")}
+        >
+          Сви који су изабрали листу
+        </button>
+        <button
+          type="button"
+          className={`${styles.pill} ${basis === "likely" ? styles.pillOn : ""}`}
+          onClick={() => setBasis("likely")}
+        >
+          Само они који ће сигурно или вероватно изаћи
+        </button>
+      </div>
 
       {set.base === 0 ? (
         <div className={styles.empty}>Још нема одговора за овај приказ.</div>
       ) : (
-        <Bars options={set.options} mode={mode} twoColumns={!page} numbered />
+        <Bars options={set.options} mode={mode} numbered />
       )}
 
-      {page && results.voteIntention.others.base > 0 && (
+      {results.voteIntention.others.base > 0 && (
         <div className={styles.others}>
           <p className={styles.othersTitle}>Остали одговори (проценат свих одговора на ово питање)</p>
-          <Bars options={results.voteIntention.others.options} mode={mode} twoColumns={false} quiet />
+          <Bars options={results.voteIntention.others.options} mode={mode} quiet />
         </div>
       )}
 

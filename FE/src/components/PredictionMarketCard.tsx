@@ -1,6 +1,6 @@
 import styles from "@/app/page.module.css";
 import type { PredictionMarket, PredictionMarketOutcome } from "@/lib/api";
-import { formatDateSr, formatRelativeSr } from "@/lib/format";
+import { formatRelativeSr } from "@/lib/format";
 import PriceChart from "@/components/PriceChart";
 
 const SERIES_COLORS = ["#5fbfb0", "#f0a24b"];
@@ -38,7 +38,7 @@ function OutcomeRow({
     <div className={`${styles.pmRow} ${rank === 1 ? styles.pmRowLeader : ""}`}>
       {outcome.imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img className={styles.pmPhoto} src={outcome.imageUrl} alt={outcome.name} width={56} height={56} loading="lazy" />
+        <img className={styles.pmPhoto} src={outcome.imageUrl} alt={outcome.name} width={36} height={36} loading="lazy" />
       ) : (
         <div className={styles.pmPhoto} aria-hidden="true" />
       )}
@@ -57,7 +57,10 @@ function OutcomeRow({
   );
 }
 
-/** Compact, read-only view of the market: two leading outcomes and the price history, no buy/sell prompts. */
+/**
+ * Compact, read-only view of the market: two leading outcomes, the price history and a note that it is not a poll.
+ * No buy/sell prompts. The width is decided by the row it sits in.
+ */
 export default function PredictionMarketCard({ market }: { market: PredictionMarket }) {
   const leaders = market.outcomes.slice(0, SHOWN_OUTCOMES);
   const series = leaders.map((outcome, i) => ({
@@ -67,42 +70,24 @@ export default function PredictionMarketCard({ market }: { market: PredictionMar
   }));
 
   return (
-    <div className={styles.pmCard}>
-      <div className={styles.pmGrid}>
-        <div>
-          <div className={styles.pmHeader}>
-            <div className={styles.pmFlagTile} aria-hidden="true" />
-            <h3 className={styles.pmTitle}>{market.marketName}</h3>
-          </div>
-
-          <div className={styles.pmMeta}>
-            {market.volume !== null && (
-              <span className={styles.pmMetaItem}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z" />
-                  <path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3" />
-                </svg>
-                {formatUsd(market.volume)} промет
-              </span>
-            )}
-            {market.endDate && (
-              <span className={styles.pmMetaItem}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" />
-                </svg>
-                Тржиште се затвара {formatDateSr(market.endDate.slice(0, 10))}
-              </span>
-            )}
-          </div>
-
-          {leaders.map((outcome, i) => (
-            <OutcomeRow key={outcome.name} outcome={outcome} rank={i + 1} color={SERIES_COLORS[i]} />
-          ))}
-        </div>
-
-        <PriceChart series={series} />
+    <section className={styles.pmCard} aria-labelledby="market-title">
+      <div className={styles.pmTop}>
+        <span className={styles.pmTag}>Предикционо тржиште</span>
+        {market.volume !== null && (
+          <span className={styles.pmMetaText}>
+            <b>{formatUsd(market.volume)}</b> промет
+          </span>
+        )}
       </div>
+      <h2 className={styles.pmTitle} id="market-title">
+        {market.marketName}
+      </h2>
+
+      {leaders.map((outcome, i) => (
+        <OutcomeRow key={outcome.name} outcome={outcome} rank={i + 1} color={SERIES_COLORS[i]} />
+      ))}
+
+      <PriceChart series={series} />
 
       <div className={styles.pmFooter}>
         <p className={styles.pmDisclaimer}>
@@ -113,6 +98,6 @@ export default function PredictionMarketCard({ market }: { market: PredictionMar
           Извор: Polymarket ↗
         </a>
       </div>
-    </div>
+    </section>
   );
 }

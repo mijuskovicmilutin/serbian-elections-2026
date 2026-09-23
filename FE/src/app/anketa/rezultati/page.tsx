@@ -81,7 +81,7 @@ export default async function RezultatiPage() {
                 <h3 className={styles.blockTitle}>
                   {survey.questions.find((q) => q.role === "VOTE_INTENTION")?.text}
                 </h3>
-                <SurveyResultsView results={results} variant="page" />
+                <SurveyResultsView results={results} />
               </div>
 
               <div className={styles.block}>

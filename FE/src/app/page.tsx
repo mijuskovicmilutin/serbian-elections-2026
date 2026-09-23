@@ -98,9 +98,7 @@ export default async function Home() {
           </a>
         </div>
 
-        {showSurvey && <SurveyHomeCard survey={survey} results={surveyResults} />}
-
-        <div className={`${styles.listGrid} ${showSurvey ? styles.listGridAfterSurvey : ""}`}>
+        <div className={styles.listGrid}>
           <div className={styles.listCardWrap}>
             <div className={styles.listBandHead}>
               <p className={styles.dividerLabel}>
@@ -133,8 +131,23 @@ export default async function Home() {
       </div>
 
       <div className={styles.darkArea}>
-        {(events.length > 0 || newsRows.length > 0 || market) && (
+        {(events.length > 0 || newsRows.length > 0 || market || showSurvey) && (
           <main className={styles.wideWrap}>
+            {(showSurvey || market) && (
+              <div className={`${styles.topRow} ${showSurvey ? "" : styles.topRowSolo}`}>
+                {showSurvey && (
+                  <div className={styles.topSurvey}>
+                    <SurveyHomeCard survey={survey} results={surveyResults} />
+                  </div>
+                )}
+                {market && (
+                  <div className={styles.topMarket}>
+                    <PredictionMarketCard market={market} />
+                  </div>
+                )}
+              </div>
+            )}
+
             {events.length > 0 && (
               <section className={styles.timelineSection}>
                 <Timeline events={events} />
@@ -184,16 +197,6 @@ export default async function Home() {
                     </div>
                   ))}
                 </div>
-              </section>
-            )}
-
-            {market && (
-              <section className={styles.predictionSection}>
-                <div className={styles.darkHead}>
-                  <h2>Предикционо тржиште</h2>
-                  <p>Цене које корисници дају на Polymarket-у. Нису резултат анкете. Освежава се на 15 минута.</p>
-                </div>
-                <PredictionMarketCard market={market} />
               </section>
             )}
           </main>

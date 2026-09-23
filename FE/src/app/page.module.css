@@ -11,6 +11,8 @@
   --accentInk: #133e38;
   --accentBg: #ddeeea;
   --signal: #c6363c;
+  --visitor: #b7791f;
+  --visitorBg: #fbf1e0;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body), system-ui, sans-serif;
@@ -30,6 +32,8 @@
     --accentInk: #cdefe8;
     --accentBg: #1d3b36;
     --signal: #f0696d;
+    --visitor: #f0a24b;
+    --visitorBg: #2b2418;
   }
 }
 
@@ -52,6 +56,8 @@
   --accentInk: #cdefe8;
   --accentBg: #1d3b36;
   --signal: #f0696d;
+  --visitor: #f0a24b;
+  --visitorBg: #2b2418;
   flex: 1;
   background: var(--bg);
   color: var(--ink);
@@ -226,10 +232,6 @@
   }
 }
 
-.predictionSection {
-  padding: 44px 0 8px;
-}
-
 .wrap {
   max-width: 760px;
   margin: 0 auto;
@@ -402,10 +404,6 @@
   padding: 26px 24px 44px;
 }
 
-.listGridAfterSurvey {
-  padding-top: 24px;
-}
-
 .listCardWrap {
   flex: 1 1 560px;
   min-width: 0;
@@ -443,60 +441,13 @@
   }
 }
 
-.pmCard {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 22px 24px 18px;
-  margin-top: 16px;
-}
-
-.pmGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-  gap: 36px;
-  align-items: center;
-}
-
-@media (max-width: 899px) {
-  .pmGrid {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-}
-
-.pmHeader {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 22px 0 6px;
-}
-
-.pmFlagTile {
-  width: 68px;
-  height: 68px;
-  flex: none;
-  border-radius: 12px;
-  border: 1px solid var(--borderStrong);
-  background: linear-gradient(#c6363c 0 33.34%, #0c4076 33.34% 66.67%, #ffffff 66.67% 100%);
-}
-
-.pmTitle {
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 22px;
-  line-height: 1.2;
-  margin: 0;
-  color: var(--ink);
-}
-
 .chart {
   margin-top: 12px;
 }
 
 .chartPlot {
   position: relative;
-  height: 150px;
+  height: 110px;
   margin: 6px 44px 0 0;
 }
 
@@ -558,98 +509,6 @@
   color: var(--ink2);
 }
 
-.pmMeta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  padding: 10px 0 16px;
-  font-size: 14px;
-  color: var(--ink2);
-}
-
-.pmMetaItem {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-variant-numeric: tabular-nums;
-}
-
-.pmRow {
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) auto;
-  column-gap: 14px;
-  align-items: center;
-  padding: 16px 0;
-  border-top: 1px solid var(--border);
-}
-
-.pmRowLeader {
-  padding: 16px 12px;
-  margin: 0 -12px;
-  border-radius: 10px;
-  background: var(--accentBg);
-  border-top-color: transparent;
-}
-
-.pmPhoto {
-  width: 56px;
-  height: 56px;
-  border-radius: 10px;
-  object-fit: cover;
-  display: block;
-  background: var(--surface2);
-}
-
-.pmName {
-  min-width: 0;
-}
-
-.pmNameLine {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.pmDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex: none;
-}
-
-.pmNameText {
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 18px;
-  line-height: 1.25;
-  color: var(--ink);
-}
-
-.pmVolume {
-  font-size: 13px;
-  color: var(--ink2);
-  margin-top: 4px;
-  padding-left: 18px;
-}
-
-.pmPct {
-  display: flex;
-  align-items: baseline;
-  justify-content: flex-end;
-  gap: 8px;
-  min-width: 128px;
-}
-
-.pmPctValue {
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 38px;
-  line-height: 1;
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-}
-
 .changeUp,
 .changeDown {
   display: inline-flex;
@@ -667,33 +526,179 @@
   color: #ff7a70;
 }
 
+/* ---- top row of the dark part: visitor survey (half) and the compact market card (30%, far right) ---- */
+.topRow {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 44px;
+}
+
+.topSurvey,
+.topMarket {
+  min-width: 0;
+}
+
+@media (min-width: 1200px) {
+  .topRow {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .topSurvey {
+    flex: none;
+    width: calc(50% - 12px);
+  }
+  .topMarket {
+    flex: none;
+    width: 30%;
+    margin-left: auto;
+  }
+  .topRowSolo .topMarket {
+    margin-left: 0;
+  }
+}
+
+/* ---- compact prediction market card ---- */
+.pmCard {
+  box-sizing: border-box;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px 16px;
+}
+
+.pmTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pmTag {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 3px 10px;
+}
+
+.pmMetaText {
+  font-size: 12.5px;
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+}
+
+.pmMetaText b {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pmTitle {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 23px;
+  margin: 12px 0 8px;
+  color: var(--ink);
+}
+
+.pmRow {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  column-gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.pmRowLeader {
+  padding: 8px 10px;
+  margin: 0 -10px;
+  border-radius: 10px;
+  background: var(--accentBg);
+  border-top-color: transparent;
+}
+
+.pmPhoto {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  background: var(--surface2);
+}
+
+.pmName {
+  min-width: 0;
+}
+
+.pmNameLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pmDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.pmNameText {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  line-height: 18px;
+  color: var(--ink);
+}
+
+.pmVolume {
+  font-size: 11.5px;
+  color: var(--ink2);
+  margin-top: 2px;
+  padding-left: 15px;
+}
+
+.pmPct {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.pmPctValue {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 26px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
 .pmFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px 12px;
   flex-wrap: wrap;
-  gap: 12px 16px;
-  padding-top: 16px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid var(--border);
 }
 
 .pmDisclaimer {
   margin: 0;
-  font-size: 12.5px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.45;
   color: var(--ink2);
-  max-width: 400px;
+  flex: 1 1 180px;
 }
 
 .pmSourceLink {
-  min-height: 44px;
-  box-sizing: border-box;
-  padding: 0 16px;
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--accent);
   text-decoration: none;
@@ -701,24 +706,7 @@
 }
 
 .pmSourceLink:hover {
-  background: var(--accentBg);
-}
-
-@media (max-width: 620px) {
-  .pmTitle {
-    font-size: 19px;
-  }
-  .pmRow {
-    grid-template-columns: 56px minmax(0, 1fr);
-    row-gap: 8px;
-  }
-  .pmPct {
-    grid-column: 2 / -1;
-    justify-content: flex-start;
-  }
-  .pmCard {
-    padding: 18px 16px 14px;
-  }
+  text-decoration: underline;
 }
 
 .listBandHead {
