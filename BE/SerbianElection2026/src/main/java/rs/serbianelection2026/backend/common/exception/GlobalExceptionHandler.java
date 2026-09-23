@@ -43,6 +43,27 @@ public class GlobalExceptionHandler {
                 .body(new ApiError("UNPROCESSABLE", e.getMessage(), Instant.now()));
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ApiError> handleTooManyRequests(TooManyRequestsException e) {
+        log.warn("Handling TooManyRequestsException: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(new ApiError("TOO_MANY_REQUESTS", e.getMessage(), Instant.now()));
+    }
+
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ApiError> handleServiceUnavailable(ServiceUnavailableException e) {
+        log.warn("Handling ServiceUnavailableException: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ApiError("SERVICE_UNAVAILABLE", e.getMessage(), Instant.now()));
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ApiError> handleForbidden(ForbiddenException e) {
+        log.warn("Handling ForbiddenException: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiError("FORBIDDEN", e.getMessage(), Instant.now()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException e) {
         String details = e.getBindingResult().getFieldErrors().stream()

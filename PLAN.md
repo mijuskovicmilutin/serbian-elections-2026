@@ -188,6 +188,188 @@ Samo FE, po mockupu "Izbori 2026 – Dizajn V3.8" (https://claude.ai/artifact/KP
 
 **Pre deploy-a:** razmotriti HTTP cache headers (ili prost in-memory cache) na javnim `/api/v1/*` endpoint-ima — nema auth/rate-limiting u V1, a podaci se osvežavaju na 15 min, pa keširanje smanjuje opterećenje baze bez uvođenja Redis-a.
 
+## V6 — Anketa posetilaca ("naša anketa")
+
+**Status: predlog 2026-09-23, revidiran istog dana; odluke korisnika iz istog dana upisane niže (anonimno, dva prikaza rezultata, odmah otvorena, zatvara se sa tišinom, besplatna zaštita od botova). Popisne margine su izvučene (vidi "Popisni podaci"); čeka još pravnu proveru; mockup je odobren za implementaciju; **V6.1 (backend) je implementiran 2026-09-24**, FE (V6.2) i admin (V6.3) nisu.**
+
+**Cilj:** *opt-in* anketa posetilaca portala: svako popunjava dobrovoljno i anonimno. Odgovara se na 2 kratka pitanja (glasačka namera i izlaznost) i 4 demografska (starost, pol, region, tip naselja), a rezultati se **ponderišu prema strukturi stanovništva** formulom niže. Rezultat je *anketa posetilaca portala*, ne istraživanje javnog mnjenja i ne izborna prognoza: uzorak je samoodabran pa nije reprezentativan, i tako se uvek označava. Cilj nije "naša CRTA", nego velika, transparentna anketa posetilaca sa jasno dokumentovanom metodologijom i otvoreno iskazanim ograničenjima.
+
+### Odnos prema načelima portala (odluka za korisnika)
+
+Portal je do sada namerno bez sopstvenih procena ("ne proizvodi političke procene"). Ova sekcija je prvo mesto gde portal sam prikuplja podatke, pa je rizik da ponderisan rezultat deluje kao pravo istraživanje. Ograde koje su deo dizajna, ne dodatak:
+- Uvek u naslovu i pored svakog broja: **"Анкета посетилаца портала — није репрезентативно истраживање јавног мњења"**. Posebna sekcija i posebna stranica, nikad na istom grafiku ni u istom spisku kao agencijske ankete, bez zajedničkog proseka.
+- **Ne prikazujemo marginu greške.** Margina važi samo za slučajan uzorak. Prikazujemo n, efektivni uzorak (n_eff) i napomenu o samoodabiru.
+- Ponderisano je glavni prikaz, a **neponderisano** je uvek dostupno uz njega (isti ekran, sekundarno). Uz rezultat stoje veličina uzorka, period prikupljanja i link na metodologiju.
+- Redosled odgovora u rezultatima je fiksan (broj na listiću), nikad po rezultatu; bez isticanja "pobednika".
+- Ponderisanje ispravlja samo poznate razlike u strukturi (starost, region, tip naselja). Ne ispravlja to što se javljaju oni koji su motivisani da glasaju za određenu opciju ili koje je neko pozvao linkom. To piše u metodologiji.
+
+### Pitanja (samo ona koja formula traži)
+
+Ukupno **6 pitanja**, sva jednostruki izbor, sva obavezna. Ništa što ne ulazi u formulu se ne pita. **Redosled odgovora je fiksan**: liste u pitanju 1 idu po zvaničnom broju na listiću (kao RIK), a skala izlaznosti ima prirodan redosled. Ne mešamo ih nasumično: nasumičan redosled listi ne odgovara onome što glasač vidi na listiću, a poredan raspon ne sme da se meša. (Prvobitni predlog nasumičnog redosleda je povučen.)
+
+**Deo A — šta se meri (ulazi u rezultat):**
+1. **Glasačka namera:** "За коју листу планирате да гласате на изборима 25. октобра?" (datum je u pitanju, pa pitanje ostaje tačno do kraja).
+   Odgovori: liste iz RIK-a (redni broj i naziv, po broju na listiću) + "Нисам одлучан/на" + "Нећу гласати" + "Не желим да одговорим".
+   Služi za: procenu po listi i udeo neopredeljenih.
+2. **Izlaznost:** "Колико је вероватно да ћете изаћи на изборе?"
+   Odgovori: Сигурно ћу изаћи / Вероватно ћу изаћи / Вероватно нећу изаћи / Сигурно нећу изаћи.
+   Služi za: osnovu "sigurno + verovatno izlaze".
+
+**Deo B — ko odgovara (ulazi u težine, ne prikazuje se pojedinačno):**
+3. **Starost:** 18–29 / 30–44 / 45–59 / 60+.
+4. **Pol:** Мушко / Женско (dve kategorije jer popis daje samo te dve; pitanje je obavezno, bez opcije koja bi izbacila odgovor iz ponderisanja).
+5. **Region** (zvanični statistički regioni, Kosovo i Metohija nije pokriven): Београд / Војводина / Шумадија и Западна Србија / Јужна и Источна Србија.
+6. **Tip naselja:** kategorije su doslovno iz popisa (administrativno-pravni kriterijum RZS): **Градско насеље** („Град или варош“) / **Остало насеље** („Село“). Ne izmišljamo prag "velikog grada". Preslikavanje na popisnu kategoriju je 1:1.
+
+Deo B su četiri margine raking-a (starost, pol, region, tip naselja); ciljni udeli su u odeljku "Popisni podaci".
+
+### Formula (ponderisanje raking-om)
+
+Ciljni udeli (margine) dolaze iz **jednog autoritativnog popisnog skupa** (predlog: **Popis 2022, RZS**), za stanovnike 18+, po svakoj dimenziji posebno; upisuju se u tabelu sa izvorom, godinom i linkom. **Brojeve ne izmišljamo** — prvi korak je da se izvuku iz popisa, a kategorije u anketi moraju da se poklope sa popisnim. Ne koristimo punu kombinaciju (4×2×4×2 = 64 ćelije) jer bi većina ćelija bila prazna pri malom uzorku, već raking (iterativno prilagođavanje) na četiri margine:
+
+1. Svaki ispitanik i dobija početnu težinu `w_i = 1`.
+2. Za svaku dimenziju d (starost, pol, region, naselje) redom: `w_i ← w_i · P_d(k) / Σ_j∈k w_j`, gde je k kategorija ispitanika i u dimenziji d, a `P_d(k)` ciljni udeo te kategorije.
+3. Ponavlja se dok najveće odstupanje neke margine od cilja ne padne ispod 0,1 procentni poen (obično 10–30 krugova).
+4. **Ograničenje težina:** posle svakog kruga težine se seku na [0,2 ; 5] prosečne težine (sprečava da nekoliko retkih ispitanika odlučuje o rezultatu), pa se raking nastavlja. Granice 0,2 i 5 su **predlog, ne utvrđena vrednost**: potvrđuju se simulacijom na probnim podacima pre V6.1 (vidi specifikaciju).
+5. Procena za opciju j: `p_j = Σ_i w_i · [i je izabrao j] / Σ_i w_i` (na izabranoj osnovi: svi koji su odgovorili, ili samo opredeljeni koji sigurno izlaze).
+6. **Efektivni uzorak:** `n_eff = (Σ w_i)² / Σ w_i²`; **design effect** `deff = n / n_eff`. Prikazujemo n i n_eff.
+7. Ako neka kategorija neke margine ima manje od 10 ispitanika, kategorije se spajaju (npr. 45–59 i 60+) ili se ponderisani rezultat ne objavljuje.
+
+Osnove rezultata (ista logika kao `result_basis` kod agencijskih anketa): svi odgovori / opredeljeni / opredeljeni koji sigurno izlaze (Q2 = "Сигурно ћу изаћи" ili "Вероватно ћу изаћи").
+
+**Prikaz rezultata (odluka 2026-09-23): dva taba.** Broj odgovora je vidljiv od prvog ("Прикупљамо одговоре: N").
+- **Tab 1 — „Сви одговори“ (bez formule):** sirovi, neponderisani rezultati. Prikazuje se odmah, koliko god da je odgovora.
+- **Tab 2 — „По формули“ (ponderisano):** rezultati sa težinama iz formule. Dok ima manje od **50** odgovora tab je zaključan uz poruku "Још N одговора до прегледа по формули". Čim se skupi 50, **tab 2 postaje podrazumevani** (prvi koji se vidi), a tab 1 ostaje pored njega kao prikaz bez formule.
+- Rizik koji prihvatamo svesno: sa 50 odgovora i četiri margine ponderisanje je nestabilno (mnoge kategorije imaju samo nekoliko ljudi). Zato uz tab 2 uvek stoje n, n_eff i upozorenje "мали узорак" dok n_eff ne pređe ~300; kategorije sa manje od 5 ispitanika se spajaju sa susednom, težine su ograničene (korak 4 formule), a ako se margine ne mogu zadovoljiti rezultat se ne prikazuje.
+- Rezultati se preračunavaju po rasporedu (npr. na 15 minuta, kao ostali podaci) i čuvaju kao snimak; javno se vidi poslednji snimak sa vremenom izračunavanja.
+
+### Kako rade profesionalne ankete i šta od toga možemo mi
+
+Profesionalna anketa (CRTA, Ipsos, Faktor plus…) ima šest koraka. **Formula za ponderisanje je tek četvrti; ono što anketu čini profesionalnom je prvi korak, izbor uzorka.**
+
+1. **Uzorak.** Slučajan, stratifikovan, višeetapan: strate su region × tip naselja; primarne jedinice (biračka mesta ili popisni krugovi) biraju se sa verovatnoćom srazmernom veličini; u njima se nasumično biraju domaćinstva, a u domaćinstvu ispitanik (npr. prema poslednjem rođendanu). Ispitivanje ide licem u lice ili telefonom, n obično 1000–2000. **Ovo mi ne možemo:** kod nas se javlja ko hoće (samoodabir).
+2. **Margina greške** (samo za slučajan uzorak, nivo poverenja 95%): `MOE = 1,96 · √( p(1−p) / n )`, a sa ponderisanjem `MOE = 1,96 · √( deff · p(1−p) / n )`. Primer: n = 1000, p = 0,5 → ±3,1 p.p.; ako je deff = 2 → ±4,4 p.p. **Kod nas se ne prikazuje** (uzorak nije slučajan).
+3. **Nonresponse i ciljni udeli.** Uz popis (RZS 2022) određuju se ciljni udeli po starosti, polu, regionu i tipu naselja.
+4. **Ponderisanje.** Post-stratifikacija (jedna dimenzija) ili raking (više dimenzija).
+   - Post-stratifikacija: `w_k = P_k / u_k`, gde je `P_k` udeo grupe k u populaciji, a `u_k` udeo u uzorku.
+   - Raking: iterativno ponavljanje istog koraka po svakoj dimenziji dok se margine ne poklope (vidi gore). **Ovo možemo.**
+5. **Modelovanje izlaznosti** ("likely voters"). Ispitanik se pušta u osnovu ako je izjavio da će izaći, ili mu se težina množi verovatnoćom izlaska: `w'_i = w_i · P(izlazak_i)`. Verovatnoće (npr. "сигурно" = 1, "вероватно" = 0,7…) su odluka agencije, ne prirodni zakon; zato je kod nas jednostavnije **prikazati dve osnove**: svi odgovori i samo "сигурно + вероватно".
+6. **Neopredeljeni.** Ili se izbace ("među opredeljenima": `p_j = glasovi_j / Σ glasovi opredeljenih`), ili se prikažu posebno, ili se raspodele srazmerno. Agencije obično navode i udeo neopredeljenih. Kod nas: izbaciti i uvek prikazati udeo neopredeljenih.
+   (Neke agencije dodatno ponderišu prema **glasu na prošlim izborima** koji ispitanik prijavi. Snažno je, ali zavisi od tačnog sećanja i zahteva zvanične rezultate za 2023; ne uvodimo u prvoj verziji.)
+
+**Radni primer (ponderisanje).** Populacija: 40% mladi, 60% stariji. Uzorak (n = 1000): 80% mladi, 20% stariji. Za opciju A: mladi 70%, stariji 30%.
+- Neponderisano: `0,8·0,70 + 0,2·0,30 = 62%`.
+- Težine: mladi `0,40/0,80 = 0,5`; stariji `0,60/0,20 = 3,0`.
+- Ponderisano: `(0,8·0,5·0,70 + 0,2·3,0·0,30) / (0,8·0,5 + 0,2·3,0) = 0,46 / 1,0 = 46%`, što je isto kao populacioni prosek `0,4·0,70 + 0,6·0,30`.
+- Cena ponderisanja: `Σw = 800·0,5 + 200·3 = 1000`, `Σw² = 800·0,25 + 200·9 = 2000`, `n_eff = 1000² / 2000 = 500`, `deff = 2`. Ponderisanjem smo ispravili strukturu, ali nam je "vredeo" samo pola uzorka.
+
+**Šta ovo znači za nas, iskreno:** možemo isto ponderisanje kao profesionalci (koraci 3–6), ali ne i njihov uzorak (korak 1). Zato je naš rezultat *ponderisana anketa posetilaca*, ne istraživanje javnog mnjenja, i ne dobija marginu greške.
+
+### Nove liste u ponudi (bez talasa)
+
+**Odluka 2026-09-23: nema talasa, anketa je jedna** i otvara se odmah, čim je portal javan. Glavne liste su već podnete; ako RIK naknadno proglasi novu listu, ona se samo **dodaje u ponudu** pitanja 1 (`survey_option.added_on`).
+- Odgovori dati ranije ostaju u istom skupu. Nova lista nije mogla biti izabrana pre dodavanja, pa joj je udeo verovatno potcenjen; uz nju se u rezultatima navodi datum dodavanja.
+- **Lista koju RIK odbije ili povuče skida se iz ponude i iz rezultata (odluka 2026-09-23, povučena lista ne ostaje u rezultatima).** Opcija dobija `active = false`. Odgovori koji su izabrali tu listu ne brišu se iz baze, ali se **ne računaju u pitanju 1** (kao da na to pitanje nisu odgovorili: ispadaju iz osnove i procenti ostalih se računaju bez njih); njihovi demografski podaci i odgovor o izlaznosti i dalje ulaze u težine i pitanje 2. Ako RIK vrati listu u važeće, opcija se ponovo aktivira i njeni odgovori se vraćaju u rezultate.
+
+### Sprečavanje zloupotrebe i privatnost
+
+- **Bez naloga, bez imena i bez IP adrese uz odgovor (odluka korisnika).** Ne pitamo ni ne čuvamo ime, prezime, JMBG, e-adresu ni broj telefona. Pitamo samo starost (grupa), pol, region, tip naselja i dva pitanja o glasanju. **IP adresa se ne čuva uz odgovor.** Tehnički se koristi: (a) potpisani kolačić "već ste odgovorili" (bez veze sa odgovorima), (b) ograničenje učestalosti po IP adresi **samo u memoriji servera**, (c) **jedan glas po mreži** (vidi sledeću tačku), (d) zaštita od botova — vidi niže. Ovo smanjuje višestruke odgovore, ne sprečava odlučnog napadača; otud i ograde.
+- **Jedan glas po mreži (IP), odluka 2026-09-23.** Cilj korisnika: sprečiti više glasova sa iste IP adrese. Rešenje koje čuva anonimnost odgovora: pri slanju server izračuna `ip_hash = HMAC-SHA256(SURVEY_HASH_KEY, survey_id ‖ mreža)`, gde je mreža IPv4 adresa ili IPv6 prefiks /64; tajni ključ je samo u env varijabli, ne u bazi. Heš ide u **posebnu tabelu `survey_dedupe`** (`survey_id`, `ip_hash`, `count`; **bez vremena, bez id-ja odgovora, bez sekvencijalnog ključa**), a odgovor u `survey_response` sa **datumom bez vremena**, da se heš ne može povezati sa odgovorom po vremenu ubacivanja. Dozvoljeno je najviše `survey.max_per_network` odgovora po hešu (predlog **3**, da porodica ili kancelarija iza iste IP adrese ne ostane bez glasa; korisnik može da postavi 1). Tabela se **briše kad se anketa zatvori**, a ključ se rotira. IP u čistom obliku se ne upisuje nigde (ni u bazu, ni u log; isključiti IP iz pristupnih logova za ovu putanju).
+  - **Ograničenja:** mobilni operateri i javne mreže dele IP (blokiraju se i pošteni korisnici), VPN i promena mreže zaobilaze proveru. Zato je ovo samo jedan sloj uz kolačić i Turnstile, ne garancija.
+  - **Pravno:** heš IP adrese je izveden iz ličnog podatka i može se smatrati pseudonimizovanim ličnim podatkom po ZZPL, čak i kad je odvojen od odgovora; mora u obaveštenje o privatnosti (svrha: zaštita od višestrukog glasanja, rok čuvanja: do zatvaranja ankete) i na pravnu proveru.
+- **Zaštita od botova: Cloudflare Turnstile** (besplatan, bez ograničenja broja provera, bez kartice; potreban je besplatan Cloudflare nalog). To je treća strana: pregledač posetioca pri slanju komunicira sa Cloudflare-om, pa to mora da stoji u obaveštenju o privatnosti; tvrdnja na stranici je zato "mi ne čuvamo", a ne "niko ne vidi IP". Alternativa ako se predomislimo: hCaptcha (besplatan nivo); reCAPTCHA se ne preporučuje zbog privatnosti.
+- Uz odgovor čuvamo samo odgovore na 6 pitanja i datum (bez vremena); ne čuvamo IP adresu, user agent ni bilo šta što identifikuje osobu. Jedini trag mreže je posebna tabela sa ključnim hešom (vidi "Jedan glas po mreži"), bez veze sa odgovorom. Odgovor na pitanje o glasanju otkriva političko opredeljenje: čak i pseudonimizovano, to spada u posebnu vrstu podataka po **Zakonu o zaštiti podataka o ličnosti**, pa se anonimnost mora dokazati (nema veze odgovor–mreža). Ide na istu pravnu proveru kao izborna tišina.
+- Admin (isti `ADMIN_API_KEY` mehanizam kao za ankete): zatvaranje ankete, isključivanje sumnjivih odgovora (nalet odgovora iz iste sekunde ili sa istog heša), izmena margina, pregled n po kategorijama. Bez naloga i bez pregleda pojedinačnih osoba.
+
+### Popisni podaci (margine): izvučeno 2026-09-23
+
+Izvor: **Popis stanovništva, domaćinstava i stanova 2022, konačni rezultati (RZS), Knjiga 2. „Starost i pol“** ([PDF](https://publikacije.stat.gov.rs/G2023/pdf/G20234003.pdf), 746 strana; tabele 1.1 i 2 na stranama PDF-a 38–61 i dalje). Popis nije obuhvatio Kosovo i Metohiju. Brojevi su preuzeti iz tabela knjige (**stanovništvo staro 18 i više godina**, „пунолетно становништво“); kontrola: svaka margina sabira se na 5.492.020, a regioni se poklapaju sa zbirovima Srbija–sever (2.813.360) i Srbija–jug (2.678.660).
+
+**Ukupno 18+: 5.492.020** (od 6.647.003 stanovnika svih uzrasta).
+
+| Dimenzija | Kategorija | 18+ stanovnika | Udeo |
+| --- | --- | --- | --- |
+| Starost | 18–29 | 848.012 | 15,44% |
+| | 30–44 | 1.325.378 | 24,13% |
+| | 45–59 | 1.377.869 | 25,09% |
+| | 60+ | 1.940.761 | 35,34% |
+| Pol | Muški | 2.637.451 | 48,02% |
+| | Ženski | 2.854.569 | 51,98% |
+| Region | Београд | 1.380.388 | 25,13% |
+| | Војводина | 1.432.972 | 26,09% |
+| | Шумадија и Западна Србија | 1.502.710 | 27,36% |
+| | Јужна и Источна Србија | 1.175.950 | 21,41% |
+| Tip naselja | Градска | 3.382.634 | 61,59% |
+| | Остала | 2.109.386 | 38,41% |
+
+**Kako je izračunata starost:** knjiga daje petogodišnje grupe i posebno ukupan broj 18+. Grupa 18–29 = (18+ ukupno − zbir grupa 20–24 … 85+) [to je 18–19: 137.820] + 20–24 + 25–29; ostale grupe su zbirovi punih petogodišnjih grupa (30–34, 35–39, 40–44 = 30–44; 45–49, 50–54, 55–59 = 45–59; 60–64 … 85+ = 60+). Nema procena, sve iz tabele.
+
+**Tip naselja (administrativno-pravni kriterijum RZS):** „градска“ su naselja koja su aktom lokalne samouprave dobila status grada, „остала“ su sva ostala (uključujući sela). Nema posebne kategorije „veliki grad“; ne izmišljamo prag. U formi: „Град или варош“ = градско, „Село“ = остало. Ispitanik sam procenjuje kojoj kategoriji pripada (nesigurnost samoprocene je poznato ograničenje). Beograd i Niš su naselja koja obuhvataju više gradskih opština, pa su celo „градска“.
+
+**Ispravka ranije procene:** u ranijoj verziji ovog plana pisalo je da je oko 75% stanovništva gradsko. To je bilo iz rezimea u pretrazi i **netačno**: tabela daje 4.120.782 gradskog i 2.526.221 ostalog (62,0% / 38,0%) za sve uzraste, a 61,6% / 38,4% za 18+.
+
+Ove brojeve ne menjamo ručno: ako RZS objavi ispravku, tabela `population_margin` se ažurira uz novu godinu/verziju izvora.
+
+### Tekst upozorenja (nacrt, mora da ga pregleda pravnik)
+
+Prikazuje se na vrhu `/anketa`, na kartici na početnoj i uz svaki rezultat (skraćeno):
+> **Анкета посетилаца портала.** Ово је анонимна, добровољна анкета. Није истраживање јавног мњења, није репрезентативна и није прогноза изборног резултата: попуњавају је само посетиоци који то желе, па резултат одражава само њих. Не тражимо име, ЈМБГ ни е-адресу и не чувамо IP адресу уз ваше одговоре. Да бисмо спречили више одговора са исте мреже, чувамо само необратив, шифрован запис мреже, одвојен од одговора, који се брише када се анкета затвори. Питамо само старост, пол, регион, тип насеља и два питања о гласању. Листе су наведене редом са гласачког листића; портал не препоручује нити рангира ниједну листу. Портал није повезан са РИК-ом, политичким странкама нити агенцијама за истраживање јавног мњења.
+
+Резултат "по формули" носи и посебну ноту: *„Резултати су прерачунати према структури становништва (старост, пол, регион, тип насеља, Попис 2022). То не поправља чињеницу да узорак није случајан.“*
+
+### Izborna tišina
+
+Objava rezultata ove ankete tretira se kao **procena rezultata**: ide pod isti prekidač faze kao ankete i tržište (V3.6/V4) i sakriva se u tišini i na dan glasanja do 20:00. **Odluka (2026-09-23): anketa se otvara odmah (čim je portal javan) i zatvara se automatski u trenutku početka tišine** (`closes_at` = isti trenutak kao prekidač iz V3.6, oko 23. oktobra u 00:00 — tačan trenutak potvrditi). Poslednji snimak rezultata vidljiv je do tada, a posle toga se sakriva; najkasnije objavljivanje je 22. oktobra uveče. Da li je i samo prikupljanje odgovora dozvoljeno u tišini pitamo pravnika; do odgovora se ne prikuplja.
+
+### Model i API (predlog)
+
+`survey` (slug, naslov, status DRAFT/OPEN/CLOSED, closes_at, min_n_publish) → `survey_question` (pozicija, tekst, uloga: VOTE_INTENTION / TURNOUT / AGE / SEX / REGION / SETTLEMENT) → `survey_option` (tekst, pozicija, `added_on`, `active`); `survey_response` (survey_id, submitted_on (samo datum, bez vremena), age_group, sex, region, settlement) + `survey_answer` (response_id, question_id, option_id); `survey_dedupe` (survey_id, ip_hash, count; bez vremena i bez veze sa odgovorom, briše se sa zatvaranjem ankete); `population_margin` (dimension, category, share, source, source_url, year); `survey_result_snapshot` (survey_id, computed_at, n, n_eff, deff, basis, rezultati po opciji kao JSON: ponderisano i neponderisano). Flyway migracije.
+- `GET /api/v1/surveys/current` — pitanja i opcije.
+- `POST /api/v1/surveys/{id}/responses` — validacija (sve opcije moraju pripadati pitanju, jedan odgovor, ograničenje učestalosti).
+- `GET /api/v1/surveys/{id}/results` — poslednji snimak; 404/prazno dok nema `min_n_publish` ili dok je faza tišine (filtrira se **na backendu**, kao ankete i tržište u V4).
+- `RakingWeighter` je čista klasa bez baze, sa jediničnim testovima (poznat primer, konvergencija, ograničenje težina, n_eff); računanje snimka radi Spring Scheduler.
+
+### FE
+
+- Nova stranica `/anketa` (objašnjenje i ograde na vrhu, forma od 6 pitanja (2 o glasanju, pa starost, pol, region, naselje), zahvalnica sa linkom na rezultate) i mala kartica na početnoj strani koja vodi na nju.
+- Rezultati na `/anketa`: dva taba (vidi "Prikaz rezultata"), uz svaki veličina uzorka (n i n_eff), period prikupljanja, osnova, vreme izračunavanja, link na metodologiju i istaknuto upozorenje da uzorak nije reprezentativan.
+- **Prvo mockup** (Claude Design), pa kod: ekrani (1) kartica na početnoj, (2) forma, (3) zahvalnica, (4) rezultati, (5) prazno stanje "prikupljamo odgovore", (6) mobilni.
+
+### Metodološka specifikacija (mora biti zatvorena pre mockupa i koda)
+
+| Stavka | Stanje |
+| --- | --- |
+| Autoritativni popisni skup | **Odlučeno i izvučeno:** Popis 2022 (RZS), Knjiga 2 „Starost i pol“, stanovništvo 18+; brojevi u „Popisni podaci“. |
+| Dimenzije ponderisanja | Starost (4), pol (2), region (4), tip naselja (2: градска / остала), kategorije preuzete iz popisa. |
+| Algoritam | Raking (iterativno proporcionalno prilagođavanje), formula gore. Kriterijum konvergencije 0,1 p.p., najviše ~50 krugova. |
+| Ograničenje težina | **Otvoreno.** Predlog [0,2 ; 5] prosečne težine; potvrditi simulacijom. |
+| Minimalni uzorak | **Odlučeno:** sirovi prikaz odmah (bez minimuma); prikaz po formuli od **50** odgovora, tada postaje podrazumevani tab; upozorenje "мали узорак" do n_eff ~300; kategorije sa manje od 5 ispitanika se spajaju. |
+| Neponderisan i ponderisan rezultat | Oba se računaju istom formulom `p_j = Σ w_i·[izabrao j] / Σ w_i`, s tim što su kod neponderisanog sve težine 1. Osnove: svi odgovori / opredeljeni / opredeljeni koji sigurno ili verovatno izlaze. |
+| Verzionisanje | **Nema talasa** (odluka): jedna anketa, nove liste se dodaju u ponudu. |
+| Zaštita od zloupotrebe | **Odlučeno:** bez imena i bez IP adrese uz odgovor; **jedan glas po mreži** preko ključnog heša u posebnoj tabeli (max 3 po mreži, briše se sa zatvaranjem ankete); kolačić; Cloudflare Turnstile (besplatan); ograničenje učestalosti po IP-u samo u memoriji. |
+
+### V6.1 Backend — implementirano (2026-09-24)
+
+Paket `survey/` (controller, dto, entity, mapper, repository, service, weighting) i migracija `V12__add_survey.sql`.
+- **Model:** `survey`, `survey_question`, `survey_option`, `survey_response` (samo datum, bez vremena), `survey_answer`, `survey_dedupe` (samo `survey_id`, `ip_hash`, `count`; bez id-ja odgovora i bez vremena), `population_margin` (seed sa brojevima iz Popisa 2022, 18+), `survey_result_snapshot`. Seed: anketa `posetioci-2026`, OPEN, otvorena od 2026-09-23, zatvara se 2026-10-23 00:00 (Beograd; početak tišine, potvrditi), 6 pitanja i njihove opcije. Opcije pitanja 1 su liste iz `electoral_list`, sinhronizovane job-om (nova lista se dodaje, odbijena ili povučena dobija `active = false`).
+- **API:** `GET /api/v1/surveys/current`, `GET /api/v1/surveys/{id}`, `POST /api/v1/surveys/{id}/responses` (201 `{accepted:true}`, bez ikakvog id-ja), `GET /api/v1/surveys/{id}/results` (poslednji snimak; 404 pre otvaranja i posle zatvaranja).
+- **Računanje:** `RakingWeighter` (čist, 13 testova, uključuje primer iz plana 62% → 46%) i `SurveyResultsCalculator` (sirovi i ponderisani procenti po osnovama "svi koji su izabrali listu" / "sigurno ili verovatno izlaze", n_eff, deff, tabela uzorak naspram stanovništva). Dimenzija sa kategorijom koja ima manje od 5 ispitanika se izostavlja i prijavljuje (`droppedDimensions`); težine su ograničene na [0,2 ; 5] prosečne težine; `smallSample` kad je n_eff < 300; ponderisano tek sa `min_weighted_responses` (50) odgovora. Odgovori za povučenu listu ispadaju iz pitanja 1, a i dalje ulaze u težine i pitanje 2.
+- **Zaštita:** jedan glas po mreži (ključni HMAC-SHA256 heš, IPv6 na /64, najviše `max_per_network` = 3, 429 posle toga; nevažeći odgovori ne troše kvotu); ograničenje učestalosti po IP u memoriji (20 na sat); Cloudflare Turnstile (proverava se na serveru, IP se ne šalje Cloudflare-u; bez tajne provera je isključena); IP se nigde ne upisuje ni loguje. Job na 15 minuta: sinhronizacija listi, novi snimak, a posle `closes_at` briše se `survey_dedupe`.
+- **Konfiguracija (env):** `SURVEY_HASH_KEY` (**obavezan**; bez njega slanje odgovora vraća 503), `TURNSTILE_SECRET` (prazno = bez provere, samo za razvoj), `SURVEY_TRUST_FORWARDED_HEADER=true` iza proksija (inače se IP čita sa soketa i svi iza proksija bi delili jedan). **FE:** ako forma šalje odgovor iz Next.js servera, mora da prosledi IP posetioca u `X-Forwarded-For`, inače BE vidi samo adresu FE servera.
+- **Testovi:** 66 novih (jedinični: raking, kalkulator, heš, IP, ograničenje učestalosti, imena listi; integracioni kroz pravi HTTP i lokalnu bazu: prihvatanje, odbijanje nevažećih, limit po mreži, da se IP i vreme ne čuvaju, zatvorena anketa, povučena lista, prag ponderisanja). Ukupno BE: 117 testova.
+- **Nije urađeno:** FE (V6.2: forma, kartica na početnoj, rezultati, kolačić "već ste odgovorili"), admin (V6.3: zatvaranje, isključivanje sumnjivih odgovora, izmena margina), povezivanje sa prekidačem tišine (V3.6), pravna provera. Snapshot se osvežava na 15 minuta, pa se odgovor pojavljuje u rezultatima tek posle sledećeg prerađivanja.
+
+### Milestone-i i kalendar
+
+V6.0 metodologija i podaci (margine iz popisa, odluke o pitanjima, pravna pitanja, mockup) → V6.1 BE model, API, `RakingWeighter` + testovi → V6.2 FE forma i početna kartica → V6.3 rezultati, snimci, admin → V6.4 zaštita od zloupotrebe i pregled privatnosti → povezivanje sa prekidačem tišine (V3.6).
+Kalendar je tesan: V3.6 ~2.10, V5 deploy ~9.10, V4 ~18.10, tišina ~23.10. Da bi anketa imala smisla mora biti javno otvorena bar ~10 dana, pa V6.0–V6.3 treba da budu gotovi oko deploy-a (~9.10), a sama anketa se otvara čim sajt bude javan. Ako to ne stigne, odložiti V4 ili sažeti V6 (bez admin isključivanja, ručno računanje snimka).
+
+**Realno očekivanje:** sa nekoliko stotina samoodabranih odgovora ponderisani rezultat je pre svega odraz toga ko čita sajt, uz dosta šuma. Vrednost sekcije je više u angažovanju i transparentnoj metodologiji nego u tačnosti; zato je označavanje kritično.
+
+**Otvorena pitanja:** (1) pravna provera: da li se rezultati ove ankete smatraju "procenom rezultata", tačan početak zabrane, da li je prikupljanje u tišini dozvoljeno, i tekst upozorenja; (2) zaštita podataka: da li anonimni odgovori (kolačić, Turnstile kao treća strana) ostaju van Zakona o zaštiti podataka o ličnosti i šta ide u obaveštenje o privatnosti; (3) granice težina (simulacija); (4) učestalost osvežavanja snimka; (5) naziv sekcije; (6) da li se prihvata odstupanje od "bez sopstvenih procena" uz ograde iznad (korisnik je odlučio da ide, ograde ostaju obavezne).
+
+**Odlučeno 2026-09-23:** anonimno bez ličnih podataka; dva taba rezultata (bez formule / po formuli, prag 50); Cloudflare Turnstile; anketa se otvara odmah i zatvara sa početkom tišine.
+
 ## Cross-cutting
 
 - Global error handling (`@RestControllerAdvice`, standardizovan `{code, message, timestamp}` response).
@@ -203,7 +385,7 @@ Microservices, Kafka, Redis u V1, Kubernetes, authentication, user accounts, com
 
 ## Milestones
 
-V1.0 skeleton → V1.1 Postgres+Flyway → V1.2 RIK integration → V1.3 election REST API → V1.4 countdown UI → V1.5 electoral lists UI → V1.6 responsive+SEO → V2.0-2.4 news → V3.0 prediction markets → V3.1 raspored početne (relayout) → V3.2 polls backend → V3.3 polls admin pregled → V3.4 polls discovery → V3.5 polls FE (početna + `/istrazivanja`) → V3.6 prekidač izborne tišine (posle pravne provere) → V3.7 timeline → V4.0–V4.6 izborni dan i izborna noć (vidi sekciju V4) → **V5.0 production deploy (domen + Vercel + Render + plaćeni Postgres)**.
+V1.0 skeleton → V1.1 Postgres+Flyway → V1.2 RIK integration → V1.3 election REST API → V1.4 countdown UI → V1.5 electoral lists UI → V1.6 responsive+SEO → V2.0-2.4 news → V3.0 prediction markets → V3.1 raspored početne (relayout) → V3.2 polls backend → V3.3 polls admin pregled → V3.4 polls discovery → V3.5 polls FE (početna + `/istrazivanja`) → V3.6 prekidač izborne tišine (posle pravne provere) → V3.7 timeline → V4.0–V4.6 izborni dan i izborna noć (vidi sekciju V4) → **V5.0 production deploy (domen + Vercel + Render + plaćeni Postgres)**. Predlog: V6.0–V6.4 anketa posetilaca (vidi sekciju V6, čeka odobrenje).
 
 **Status (2026-09-21):** V1 i V2 gotovi, V3 gotov osim V3.6: V3.0 (Polymarket), V3.1 (relayout početne), V3.2 (model i javni API anketa), V3.3 (admin pregled), V3.4 (otkrivanje objava), V3.5 (prikaz anketa) i V3.7 (timeline). Ostaje **V3.6 (prekidač izborne tišine, posle pravne provere)**, zatim V4 (izborna noć, vidi sekciju V4) i V5 (deploy, u praksi pre V4). **Pre objave prve prave ankete proveriti pravilo o izbornoj tišini.**
 
