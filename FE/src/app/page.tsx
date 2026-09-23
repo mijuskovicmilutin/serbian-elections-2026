@@ -144,26 +144,28 @@ export default async function Home() {
                         </span>
                         <span className={styles.newsBlockHint}>Води на сајт медија ↗</span>
                       </div>
-                      {row.items.map((item) => (
-                        <a
-                          className={styles.newsItem}
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          key={item.url}
-                        >
-                          {item.imageUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img className={styles.newsThumb} src={item.imageUrl} alt="" loading="lazy" />
-                          ) : (
-                            <span className={styles.newsThumb} aria-hidden="true" />
-                          )}
-                          <span>
-                            <span className={styles.newsItemTitle}>{item.title}</span>
-                            <span className={styles.newsItemMeta}>{formatRelativeSr(item.publishedAt)}</span>
-                          </span>
-                        </a>
-                      ))}
+                      <div className={styles.newsCards}>
+                        {row.items.map((item) => (
+                          <a
+                            className={styles.newsCard}
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            key={item.url}
+                          >
+                            {item.imageUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img className={styles.newsCardImg} src={item.imageUrl} alt="" loading="lazy" />
+                            ) : (
+                              <span className={styles.newsCardImg} aria-hidden="true" />
+                            )}
+                            <span className={styles.newsCardBody}>
+                              <span className={styles.newsCardTitle}>{item.title}</span>
+                              <span className={styles.newsCardCat}>Политика</span>
+                            </span>
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
