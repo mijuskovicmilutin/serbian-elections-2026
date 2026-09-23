@@ -19,11 +19,11 @@ import Timeline from "@/components/Timeline";
 
 const RIK_URL = "https://www.rik.parlament.gov.rs";
 
-const NEWS_SOURCES: { key: NewsSource; label: string; logo: string; logoClass: string }[] = [
-  { key: "N1", label: "N1", logo: "/images/logos/n1.svg", logoClass: styles.logoN1 },
-  { key: "NOVA", label: "Nova.rs", logo: "/images/logos/nova.svg", logoClass: styles.logoNova },
-  { key: "BLIC", label: "Blic", logo: "/images/logos/blic.png", logoClass: styles.logoBlic },
-  { key: "INFORMER", label: "Informer", logo: "/images/logos/informer.png", logoClass: styles.logoInformer },
+const NEWS_SOURCES: { key: NewsSource; label: string; logo: string; logoClass: string; homeUrl: string }[] = [
+  { key: "N1", label: "N1", logo: "/images/logos/n1.svg", logoClass: styles.logoN1, homeUrl: "https://n1info.rs" },
+  { key: "NOVA", label: "Nova.rs", logo: "/images/logos/nova.svg", logoClass: styles.logoNova, homeUrl: "https://nova.rs" },
+  { key: "BLIC", label: "Blic", logo: "/images/logos/blic.png", logoClass: styles.logoBlic, homeUrl: "https://www.blic.rs" },
+  { key: "INFORMER", label: "Informer", logo: "/images/logos/informer.png", logoClass: styles.logoInformer, homeUrl: "https://informer.rs" },
 ];
 
 /** Lists RIK published after this instant get a "нова" badge. */
@@ -52,6 +52,7 @@ export default async function Home() {
     source: s.label,
     logo: s.logo,
     logoClass: s.logoClass,
+    homeUrl: s.homeUrl,
     items: newsBySource[i].slice(0, 4),
   })).filter((row) => row.items.length > 0);
 
@@ -142,7 +143,9 @@ export default async function Home() {
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={row.logo} alt={row.source} />
                         </span>
-                        <span className={styles.newsBlockHint}>Води на сајт медија ↗</span>
+                        <a className={styles.newsBlockLink} href={row.homeUrl} target="_blank" rel="noopener noreferrer">
+                          Води на сајт медија ↗
+                        </a>
                       </div>
                       <div className={styles.newsCards}>
                         {row.items.map((item) => (

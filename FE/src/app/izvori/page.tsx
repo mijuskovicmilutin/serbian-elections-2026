@@ -8,6 +8,14 @@ export const metadata: Metadata = {
   description: "Одакле долазе подаци приказани на порталу и колико често се ажурирају.",
 };
 
+function ExtLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  );
+}
+
 export default function IzvoriPage() {
   return (
     <div className={styles.page}>
@@ -28,45 +36,99 @@ export default function IzvoriPage() {
                 <span className={styles.sourceStatus}>активно</span>
               </div>
               <p>
-                Изборне листе и статус пријаве/проглашења преузимају се са{" "}
-                <a href="https://www.rik.parlament.gov.rs/" target="_blank" rel="noopener noreferrer">
-                  rik.parlament.gov.rs
-                </a>{" "}
-                аутоматски, на сваких 15 минута. Портал не мења нити тумачи податке РИК-а — приказује их у
-                изворном облику.
+                Изборне листе и њихов редни број преузимају се са{" "}
+                <ExtLink href="https://www.rik.parlament.gov.rs/">rik.parlament.gov.rs</ExtLink> аутоматски, на
+                сваких 15 минута. Портал не мења нити тумачи податке РИК-а — приказује их у изворном облику, уз
+                линк ка документу листе.
               </p>
             </div>
 
             <div className={styles.sourceCard}>
               <div className={styles.sourceCardHead}>
                 <h2>Вести из медија</h2>
-                <span className={`${styles.sourceStatus} ${styles.sourceStatusPending}`}>ускоро</span>
+                <span className={styles.sourceStatus}>активно</span>
               </div>
               <p>
-                Наслови и слике из политичких рубрика медија (нпр. N1, Nova, Blic, Informer) — само метаподаци,
-                без преузимања пуног текста. Клик на вест увек води на изворни медиј.
+                Наслови, слике и линкови преко јавних RSS feed-ова, на сваких 15 минута; за сваки медиј
+                приказујемо 4 најновије вести. Не преузимамо пун текст, а клик увек води на сајт медија.
+              </p>
+              <ul>
+                <li>
+                  <ExtLink href="https://n1info.rs">N1</ExtLink> — општа рубрика „Вести“ (N1 нема посебну
+                  политичку рубрику)
+                </li>
+                <li>
+                  <ExtLink href="https://nova.rs">Nova.rs</ExtLink> — рубрика политика
+                </li>
+                <li>
+                  <ExtLink href="https://www.blic.rs">Blic</ExtLink> — рубрика Вести / Политика
+                </li>
+                <li>
+                  <ExtLink href="https://informer.rs">Informer</ExtLink> — рубрика политика
+                </li>
+              </ul>
+              <p style={{ marginTop: 10 }}>
+                Вести нису филтриране по теми избора, па се повремено појави и вест која нема везе са њима.
               </p>
             </div>
 
             <div className={styles.sourceCard}>
               <div className={styles.sourceCardHead}>
-                <h2>Анкете јавног мњења</h2>
-                <span className={`${styles.sourceStatus} ${styles.sourceStatusPending}`}>ускоро</span>
+                <h2>Истраживања јавног мњења</h2>
+                <span className={styles.sourceStatus}>активно</span>
               </div>
               <p>
-                Објављена истраживања агенција за испитивање јавног мњења, са методологијом, узорком и датумом
-                истраживања. Портал не рачуна сопствени &quot;polling score&quot; нити просек анкета.
+                Приказујемо само истраживања агенција са познатом методологијом. Свако истраживање се ручно
+                проверава пре објаве, а уз резултате је наведено на шта се проценти односе. Не рачунамо просек
+                анкета нити „polling score“. Оно што сам извор напомиње о бројкама приказујемо као „Напомена извора“.
+              </p>
+              <ul>
+                <li>
+                  <ExtLink href="https://crta.rs">CRTA</ExtLink> — примарни извор, бројеве уносимо из објављених
+                  извештаја
+                </li>
+                <li>
+                  Faktor plus — секундарни извор: резултате преносе медији (нпр. Danas, Blic, 021), па је уз
+                  истраживање наведено ко их је пренео
+                </li>
+                <li>CeSID — још нема објављеног истраживања о гласачким намерама</li>
+              </ul>
+            </div>
+
+            <div className={styles.sourceCard}>
+              <div className={styles.sourceCardHead}>
+                <h2>Предикционо тржиште</h2>
+                <span className={styles.sourceStatus}>активно</span>
+              </div>
+              <p>
+                Цене и историја цена за питање „Next Prime Minister of Serbia?“ преузимају се преко јавног API-ја
+                платформе <ExtLink href="https://polymarket.com">Polymarket</ExtLink>, на сваких 15 минута.
+                Приказујемо два исхода са највишом ценом. Ово нису подаци из анкета нити прогноза портала, и
+                портал не нуди куповину ни клађење.
               </p>
             </div>
 
             <div className={styles.sourceCard}>
               <div className={styles.sourceCardHead}>
-                <h2>Predikciona tržišta</h2>
-                <span className={`${styles.sourceStatus} ${styles.sourceStatusPending}`}>ускоро</span>
+                <h2>Кључни датуми</h2>
+                <span className={styles.sourceStatus}>активно</span>
               </div>
               <p>
-                Цене са платформи попут Polymarket-a, приказане у посебној целини, јасно одвојено од анкета.
-                Ово нису подаци из анкета нити прогноза портала.
+                Рокови и датуми изборног процеса унети су на основу објављених одлука и медијских извештаја (нпр.
+                Danas, eUpravo za to), а уз сваки датум стоји линк на извор.
+              </p>
+            </div>
+
+            <div className={styles.sourceCard}>
+              <div className={styles.sourceCardHead}>
+                <h2>Фотографија</h2>
+              </div>
+              <p>
+                Фотографија Народне скупштине на почетној страни: Fred Romero,{" "}
+                <ExtLink href="https://commons.wikimedia.org/wiki/File:Beograd_-_Narodna_skup%C5%A1tina_Republike_Srbije_(44881251532).jpg">
+                  Wikimedia Commons
+                </ExtLink>
+                , лиценца CC BY 2.0.
               </p>
             </div>
           </div>
