@@ -97,6 +97,23 @@ export default function IzvoriPage() {
 
             <div className={styles.sourceCard}>
               <div className={styles.sourceCardHead}>
+                <h2>Анкета посетилаца портала</h2>
+                <span className={styles.sourceStatus}>активно</span>
+              </div>
+              <p>
+                Ово је наша анкета, а не туђи податак: анонимна је, добровољна и није репрезентативна. Одговори се
+                прерачунавају према структури становништва старијег од 18 година (старост, пол, регион, тип насеља) по
+                подацима{" "}
+                <ExtLink href="https://publikacije.stat.gov.rs/G2023/pdf/G20234003.pdf">
+                  Пописа 2022, Књига 2 „Старост и пол“, РЗС
+                </ExtLink>
+                . Резултати се освежавају на 15 минута, а анкета се затвара са почетком изборне тишине. Погледајте{" "}
+                <a href="/anketa/rezultati#metodologija">методологију</a> и <a href="/anketa/privatnost">приватност</a>.
+              </p>
+            </div>
+
+            <div className={styles.sourceCard}>
+              <div className={styles.sourceCardHead}>
                 <h2>Предикционо тржиште</h2>
                 <span className={styles.sourceStatus}>активно</span>
               </div>

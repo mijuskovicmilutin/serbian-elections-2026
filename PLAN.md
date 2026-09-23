@@ -190,7 +190,7 @@ Samo FE, po mockupu "Izbori 2026 – Dizajn V3.8" (https://claude.ai/artifact/KP
 
 ## V6 — Anketa posetilaca ("naša anketa")
 
-**Status: predlog 2026-09-23, revidiran istog dana; odluke korisnika iz istog dana upisane niže (anonimno, dva prikaza rezultata, odmah otvorena, zatvara se sa tišinom, besplatna zaštita od botova). Popisne margine su izvučene (vidi "Popisni podaci"); čeka još pravnu proveru; mockup je odobren za implementaciju; **V6.1 (backend) je implementiran 2026-09-24**, FE (V6.2) i admin (V6.3) nisu.**
+**Status: predlog 2026-09-23, revidiran istog dana; odluke korisnika iz istog dana upisane niže (anonimno, dva prikaza rezultata, odmah otvorena, zatvara se sa tišinom, besplatna zaštita od botova). Popisne margine su izvučene (vidi "Popisni podaci"); čeka još pravnu proveru; mockup je odobren za implementaciju; **V6.1 (backend) i V6.2 (FE) su implementirani 2026-09-24**, admin (V6.3) nije.**
 
 **Cilj:** *opt-in* anketa posetilaca portala: svako popunjava dobrovoljno i anonimno. Odgovara se na 2 kratka pitanja (glasačka namera i izlaznost) i 4 demografska (starost, pol, region, tip naselja), a rezultati se **ponderišu prema strukturi stanovništva** formulom niže. Rezultat je *anketa posetilaca portala*, ne istraživanje javnog mnjenja i ne izborna prognoza: uzorak je samoodabran pa nije reprezentativan, i tako se uvek označava. Cilj nije "naša CRTA", nego velika, transparentna anketa posetilaca sa jasno dokumentovanom metodologijom i otvoreno iskazanim ograničenjima.
 
@@ -358,6 +358,17 @@ Paket `survey/` (controller, dto, entity, mapper, repository, service, weighting
 - **Konfiguracija (env):** `SURVEY_HASH_KEY` (**obavezan**; bez njega slanje odgovora vraća 503), `TURNSTILE_SECRET` (prazno = bez provere, samo za razvoj), `SURVEY_TRUST_FORWARDED_HEADER=true` iza proksija (inače se IP čita sa soketa i svi iza proksija bi delili jedan). **FE:** ako forma šalje odgovor iz Next.js servera, mora da prosledi IP posetioca u `X-Forwarded-For`, inače BE vidi samo adresu FE servera.
 - **Testovi:** 66 novih (jedinični: raking, kalkulator, heš, IP, ograničenje učestalosti, imena listi; integracioni kroz pravi HTTP i lokalnu bazu: prihvatanje, odbijanje nevažećih, limit po mreži, da se IP i vreme ne čuvaju, zatvorena anketa, povučena lista, prag ponderisanja). Ukupno BE: 117 testova.
 - **Nije urađeno:** FE (V6.2: forma, kartica na početnoj, rezultati, kolačić "već ste odgovorili"), admin (V6.3: zatvaranje, isključivanje sumnjivih odgovora, izmena margina), povezivanje sa prekidačem tišine (V3.6), pravna provera. Snapshot se osvežava na 15 minuta, pa se odgovor pojavljuje u rezultatima tek posle sledećeg prerađivanja.
+
+### V6.2 Frontend — implementirano (2026-09-24)
+
+Po odobrenom mockupu (anketa odmah ispod odbrojavanja na početnoj).
+- **Početna:** `SurveyHomeCard` (server) ispod hero dela, iznad listi i istraživanja: broj odgovora, velika dugmad "Попуни анкету", link na rezultate i metodologiju, pitanje 1 sa rezultatima u dva taba (`SurveyResultsView`, client). Kartica se ne prikazuje ako nema ankete ili je zatvorena (tišina). Početna ne čita kolačiće, pa ostaje statički keširana (revalidate 60 s).
+- **`/anketa`:** upozorenje, forma sa 6 pitanja (`SurveyForm`, client, `useActionState`), zaštita od botova (Turnstile widget kad backend to traži i kad je `NEXT_PUBLIC_TURNSTILE_SITE_KEY` podešen), stanja "zatvorena" i "već ste odgovorili". Slanje ide preko Server Action-a (`app/anketa/actions.ts`) koji prosleđuje IP posetioca u `X-Forwarded-For`; posle uspeha postavlja httpOnly kolačić `anketa_<id>` (60 dana, samo pamti da je pregledač odgovorio) i vodi na `/anketa/hvala`.
+- **`/anketa/rezultati`:** činjenice (odgovori, ef. uzorak, period, poslednji prerađun), pitanje 1 sa tabovima i izborom osnove, izlaznost, tabela uzorak naspram stanovništva, metodologija (`#metodologija`). Obaveštenja: "Мали узорак", izostavljene dimenzije, neusaglašene margine.
+- **`/anketa/privatnost`:** opis šta se čuva i šta ne (činjenice iz sistema; **pravnik mora da pregleda, i treba dodati kontakt/rukovaoca i rok čuvanja odgovora posle izbora, što još nije odlučeno**).
+- Zaglavlje ima link "Анкета", stranice "О порталу" i "Извори" opisuju anketu.
+- **Produkcija:** FE env `NEXT_PUBLIC_TURNSTILE_SITE_KEY`; BE env `SURVEY_HASH_KEY`, `TURNSTILE_SECRET`, `SURVEY_TRUST_FORWARDED_HEADER=true`. Proveriti da li hosting prosleđuje pravi IP u `X-Forwarded-For` do Server Action-a.
+- Provereno u pregledaču: prikaz na početnoj, slanje odgovora kroz formu (odgovor prihvaćen, kolačić postavljen, preusmeravanje), rezultati sa 71 probnim odgovorom (tabovi, upozorenja), zatim su probni podaci obrisani.
 
 ### Milestone-i i kalendar
 

@@ -192,3 +192,104 @@ export async function getCurrentEvents(): Promise<ElectionEvent[]> {
     return [];
   }
 }
+
+// ---- Visitor survey (V6) ----
+
+export type SurveyRole = "VOTE_INTENTION" | "TURNOUT" | "AGE" | "SEX" | "REGION" | "SETTLEMENT";
+export type SurveyOptionKind = "CHOICE" | "UNDECIDED" | "WONT_VOTE" | "NO_ANSWER";
+
+export type SurveyOption = {
+  id: number;
+  position: number;
+  label: string;
+  kind: SurveyOptionKind;
+  addedOn: string | null;
+};
+
+export type SurveyQuestion = {
+  id: number;
+  position: number;
+  role: SurveyRole;
+  text: string;
+  options: SurveyOption[];
+};
+
+export type Survey = {
+  id: number;
+  slug: string;
+  title: string;
+  opensAt: string;
+  closesAt: string;
+  acceptingAnswers: boolean;
+  resultsVisible: boolean;
+  responseCount: number;
+  minWeightedResponses: number;
+  botCheckRequired: boolean;
+  questions: SurveyQuestion[];
+};
+
+export type SurveyOptionShare = {
+  optionId: number;
+  label: string;
+  position: number;
+  kind: SurveyOptionKind;
+  count: number;
+  rawPct: number | null;
+  weightedPct: number | null;
+};
+
+export type SurveyShareSet = { base: number; options: SurveyOptionShare[] };
+
+export type SurveyWeighting = {
+  effectiveSampleSize: number;
+  designEffect: number;
+  converged: boolean;
+  maxDeviationPct: number;
+  usedDimensions: string[];
+  droppedDimensions: string[];
+  smallSample: boolean;
+};
+
+export type SurveyStructureCategory = {
+  code: string;
+  label: string;
+  sampleCount: number;
+  samplePct: number | null;
+  populationPct: number | null;
+};
+
+export type SurveyStructureDimension = { dimension: string; categories: SurveyStructureCategory[] };
+
+export type SurveyResults = {
+  surveyId: number;
+  computedAt: string;
+  opensAt: string;
+  closesAt: string;
+  responseCount: number;
+  minWeightedResponses: number;
+  weightedAvailable: boolean;
+  weighting: SurveyWeighting | null;
+  voteIntention: { lists: SurveyShareSet; likelyVoters: SurveyShareSet; others: SurveyShareSet };
+  turnout: SurveyShareSet;
+  structure: SurveyStructureDimension[];
+};
+
+// Optional section: no survey (or a backend that is down) means the survey is simply not shown.
+export async function getCurrentSurvey(): Promise<Survey | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/surveys/current`, { next: { revalidate: 60 } });
+    return res.ok ? ((await res.json()) as Survey) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Null when the results are not available (not open yet, or closed for the election silence). */
+export async function getSurveyResults(surveyId: number): Promise<SurveyResults | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/surveys/${surveyId}/results`, { next: { revalidate: 60 } });
+    return res.ok ? ((await res.json()) as SurveyResults) : null;
+  } catch {
+    return null;
+  }
+}

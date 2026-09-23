@@ -11,6 +11,7 @@ export default function SiteHeader({ wide = false }: { wide?: boolean }) {
           </Link>
           <nav className={styles.nav}>
             <Link href="/">Почетна</Link>
+            <Link href="/anketa">Анкета</Link>
             <Link href="/istrazivanja">Истраживања</Link>
             <Link href="/o-portalu">О порталу</Link>
             <Link href="/izvori">Извори</Link>

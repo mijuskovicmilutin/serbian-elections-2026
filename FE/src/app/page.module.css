@@ -402,6 +402,10 @@
   padding: 26px 24px 44px;
 }
 
+.listGridAfterSurvey {
+  padding-top: 24px;
+}
+
 .listCardWrap {
   flex: 1 1 560px;
   min-width: 0;

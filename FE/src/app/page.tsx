@@ -1,5 +1,7 @@
 import styles from "./page.module.css";
 import {
+  getCurrentSurvey,
+  getSurveyResults,
   getCurrentElection,
   getCurrentElectoralLists,
   getCurrentEvents,
@@ -12,6 +14,7 @@ import { formatDateSr, formatRelativeSr } from "@/lib/format";
 import Countdown from "@/components/Countdown";
 import ElectoralListsPaginated from "@/components/ElectoralListsPaginated";
 import PollHomeCard from "@/components/polls/PollHomeCard";
+import SurveyHomeCard from "@/components/survey/SurveyHomeCard";
 import PredictionMarketCard from "@/components/PredictionMarketCard";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
@@ -32,14 +35,21 @@ function hoursAgoIso(hours: number): string {
 }
 
 export default async function Home() {
-  const [election, lists, newsBySource, predictionMarket, polls, events] = await Promise.all([
+  const [election, lists, newsBySource, predictionMarket, polls, events, surveyOnHome] = await Promise.all([
     getCurrentElection(),
     getCurrentElectoralLists(),
     Promise.all(NEWS_SOURCES.map((s) => getNewsBySource(s.key))),
     getCurrentPredictionMarket(),
     getLatestPollPerPollster(),
     getCurrentEvents(),
+    // Optional section: no survey (or a failing backend) simply means no card.
+    (async () => {
+      const survey = await getCurrentSurvey();
+      return { survey, results: survey?.resultsVisible ? await getSurveyResults(survey.id) : null };
+    })(),
   ]);
+  const { survey, results: surveyResults } = surveyOnHome;
+  const showSurvey = survey !== null && (survey.acceptingAnswers || survey.resultsVisible);
 
   const targetIso = `${election.electionDate}T07:00:00+02:00`;
   const mostRecentlySeen = lists.reduce<string | null>((latest, list) => {
@@ -88,7 +98,9 @@ export default async function Home() {
           </a>
         </div>
 
-        <div className={styles.listGrid}>
+        {showSurvey && <SurveyHomeCard survey={survey} results={surveyResults} />}
+
+        <div className={`${styles.listGrid} ${showSurvey ? styles.listGridAfterSurvey : ""}`}>
           <div className={styles.listCardWrap}>
             <div className={styles.listBandHead}>
               <p className={styles.dividerLabel}>
