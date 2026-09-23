@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import styles from "@/app/page.module.css";
 import type { ElectionEvent } from "@/lib/api";
 import { formatDateSr } from "@/lib/format";
@@ -29,15 +30,16 @@ export default function Timeline({ events }: { events: ElectionEvent[] }) {
         <h2>Кључни датуми</h2>
         <p>Рокови и датуми изборног процеса, са изворима.</p>
       </div>
-      <ol className={styles.timelineList}>
+      <ol className={styles.timelineList} style={{ "--cols": events.length } as CSSProperties}>
         {events.map((event) => {
           const diff = daysUntil(today, event.eventDate);
           const state = diff < 0 ? styles.timelinePast : diff === 0 ? styles.timelineToday : "";
           const isNext = event.id === nextId;
+          const isDay = event.type === "ELECTION_DAY";
           const tag =
             diff < 0 ? "прошло" : diff === 0 ? "данас" : `за ${diff} ${daysWord(diff)}`;
           return (
-            <li className={`${styles.timelineItem} ${state} ${isNext ? styles.timelineNext : ""}`} key={event.id}>
+            <li className={`${styles.timelineItem} ${state} ${isNext ? styles.timelineNext : ""} ${isDay ? styles.timelineDay : ""}`} key={event.id}>
               <span className={styles.timelineDot} aria-hidden="true" />
               <div>
                 <div className={styles.timelineDateRow}>

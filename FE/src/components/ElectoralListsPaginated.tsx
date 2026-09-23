@@ -19,9 +19,12 @@ function displayName(name: string): string {
 
 type Props = {
   lists: ElectoralList[];
+  /** ISO instant; lists published after it get the "нова" badge. Passed from the server so SSR and hydration agree. */
+  recentSince?: string;
 };
 
-export default function ElectoralListsPaginated({ lists }: Props) {
+export default function ElectoralListsPaginated({ lists, recentSince }: Props) {
+  const recentMs = recentSince ? Date.parse(recentSince) : null;
   const [page, setPage] = useState(0);
   const pageCount = Math.max(1, Math.ceil(lists.length / PAGE_SIZE));
   const visible = lists.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
@@ -52,6 +55,9 @@ export default function ElectoralListsPaginated({ lists }: Props) {
                   извор: РИК, {formatDateSr(list.publishedAt)}
                   <ArrowUpRight aria-hidden="true" />
                 </a>
+                {recentMs !== null && Date.parse(list.publishedAt) >= recentMs && (
+                  <span className={styles.newBadge}>нова</span>
+                )}
               </div>
             </div>
           </div>

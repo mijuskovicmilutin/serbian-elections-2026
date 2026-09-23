@@ -128,6 +128,16 @@ Redosled odozgo: zaglavlje, hero sa odbrojavanjem, zatim, preko fotografije Skup
 - **Tamna boja** sekcije vesti (`#14181A`) ide bez prekida do dna stranice, uključujući podnožje ("O portalu", "Izvori", napomena da portal nije zvaničan). Tamna paleta u ovom delu je fiksna (ne zavisi od teme), za razliku od ostatka koji sada prati `prefers-color-scheme`; potvrditi pri implementaciji.
 - Mobilni prikaz: sve u jednoj koloni istim redosledom.
 
+### V3.8 Dizajn početne — implementirano (2026-09-23)
+
+Samo FE, po mockupu "Izbori 2026 – Dizajn V3.8" (https://claude.ai/artifact/KPDtfb9uafm4SJ3Xc21pvH).
+- **Širina:** cela početna (osim hero teksta) deli kontejner 1592px (`.wideWrap`). Liste i istraživanja: jedna pored druge od 1200px (po pola ekrana, najviše 760px), od 720 do 1199px jedna ispod druge širine 60% ekrana (min 520px), ispod 720px cela širina.
+- **Ključni datumi:** horizontalno od 900px, vertikalno ispod; Dan glasanja u `--signal` boji.
+- **Vesti:** blok po izvoru (logo + 4 stavke sa slikom levo), dva bloka u redu od 900px. Ostaje 4 vesti po izvoru i **bez filtera po temi izbora** (N1 koristi opšti feed; namerno odloženo jer je filter po ključnim rečima težak za održavanje).
+- **Predikciono tržište:** kompaktno, ishodi levo i grafik desno, bez Yes/No dugmadi i bez rang oznake.
+- **Tekst:** rečenica (prvo veliko slovo) umesto versala svuda, wordmark "Избори 2026" ćirilicom, oznaka УЖИВО uklonjena (čuva se za izbornu noć, V4). Imena listi ostaju kako ih daje RIK.
+- **Značka "нова"** na listi koju je RIK objavio u poslednja 48 sata.
+
 ## V4 — Izborni dan i izborna noć (Election Day Mode)
 
 **Status: dogovoreno 2026-09-21, nije početo.** Numeracija: ovo je novi V4, a raniji "V4 — Deployment" je sada **V5**. Zavisi od V3.6 (fazni model i prekidač izborne tišine): V4 ga proširuje.

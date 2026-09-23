@@ -26,6 +26,11 @@ const NEWS_SOURCES: { key: NewsSource; label: string; logo: string; logoClass: s
   { key: "INFORMER", label: "Informer", logo: "/images/logos/informer.png", logoClass: styles.logoInformer },
 ];
 
+/** Lists RIK published after this instant get a "нова" badge. */
+function hoursAgoIso(hours: number): string {
+  return new Date(Date.now() - hours * 3_600_000).toISOString();
+}
+
 export default async function Home() {
   const [election, lists, newsBySource, predictionMarket, polls, events] = await Promise.all([
     getCurrentElection(),
@@ -50,16 +55,18 @@ export default async function Home() {
     items: newsBySource[i].slice(0, 4),
   })).filter((row) => row.items.length > 0);
 
+  const recentSince = hoursAgoIso(48);
+
   const market = predictionMarket && predictionMarket.outcomes.length > 0 ? predictionMarket : null;
 
   return (
     <div className={`${styles.page} ${styles.homePage}`}>
-      <SiteHeader />
+      <SiteHeader wide />
 
       <div className={styles.heroAndLists}>
         <div className={styles.megaPhoto}>
           <div className={styles.tintBlue}>
-            <div className={styles.wrap}>
+            <div className={styles.wideWrap}>
               <section className={styles.record}>
                 <h1 className={styles.h1}>{election.name}</h1>
                 <p className={styles.recordSubtitle}>Избори за народне посланике</p>
@@ -88,7 +95,6 @@ export default async function Home() {
                 <a className={styles.titleLink} href={RIK_URL} target="_blank" rel="noopener noreferrer">
                   РИК
                 </a>
-                <span className={styles.liveBadge}>УЖИВО</span>
               </p>
               <p className={styles.dividerSub}>Освежава се на 15 минута</p>
             </div>
@@ -100,7 +106,7 @@ export default async function Home() {
                   {mostRecentlySeen ? ` · ажурирано ${formatRelativeSr(mostRecentlySeen)}` : ""}
                 </span>
               </div>
-              <ElectoralListsPaginated lists={lists} />
+              <ElectoralListsPaginated lists={lists} recentSince={recentSince} />
             </div>
             <div className={styles.cardFooter}>
               <a className={styles.cardSourceLink} href={RIK_URL} target="_blank" rel="noopener noreferrer">
@@ -115,7 +121,7 @@ export default async function Home() {
 
       <div className={styles.darkArea}>
         {(events.length > 0 || newsRows.length > 0 || market) && (
-          <main className={styles.wrap}>
+          <main className={styles.wideWrap}>
             {events.length > 0 && (
               <section className={styles.timelineSection}>
                 <Timeline events={events} />
@@ -124,32 +130,37 @@ export default async function Home() {
 
             {newsRows.length > 0 && (
               <section className={styles.newsSection}>
-                <div className={styles.newsHead}>
+                <div className={styles.darkHead}>
                   <h2>Вести о изборима</h2>
                   <p>Најновији текстови из медија који прате изборе — водимо вас на изворни сајт.</p>
                 </div>
-                <div className={styles.newsRows}>
+                <div className={styles.newsGrid}>
                   {newsRows.map((row) => (
-                    <div className={styles.newsRow} key={row.source}>
-                      <div className={styles.newsRowLabel}>
+                    <div className={styles.newsBlock} key={row.source}>
+                      <div className={styles.newsBlockHead}>
                         <span className={`${styles.newsLogo} ${row.logoClass}`}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={row.logo} alt={row.source} />
                         </span>
+                        <span className={styles.newsBlockHint}>Води на сајт медија ↗</span>
                       </div>
                       {row.items.map((item) => (
                         <a
-                          className={styles.newsCard}
+                          className={styles.newsItem}
                           href={item.url}
                           target="_blank"
                           rel="noopener noreferrer"
                           key={item.url}
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img className={styles.newsCardImg} src={item.imageUrl ?? ""} alt="" loading="lazy" />
-                          <span className={styles.newsCardBody}>
-                            <span className={styles.newsCardTitle}>{item.title}</span>
-                            <span className={styles.newsCardCat}>Политика</span>
+                          {item.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img className={styles.newsThumb} src={item.imageUrl} alt="" loading="lazy" />
+                          ) : (
+                            <span className={styles.newsThumb} aria-hidden="true" />
+                          )}
+                          <span>
+                            <span className={styles.newsItemTitle}>{item.title}</span>
+                            <span className={styles.newsItemMeta}>{formatRelativeSr(item.publishedAt)}</span>
                           </span>
                         </a>
                       ))}
@@ -161,13 +172,17 @@ export default async function Home() {
 
             {market && (
               <section className={styles.predictionSection}>
+                <div className={styles.darkHead}>
+                  <h2>Предикционо тржиште</h2>
+                  <p>Цене које корисници дају на Polymarket-у. Нису резултат анкете. Освежава се на 15 минута.</p>
+                </div>
                 <PredictionMarketCard market={market} />
               </section>
             )}
           </main>
         )}
 
-        <SiteFooter />
+        <SiteFooter wide />
       </div>
     </div>
   );

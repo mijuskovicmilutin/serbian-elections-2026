@@ -1,9 +1,9 @@
 import styles from "@/app/page.module.css";
 
-export default function SiteFooter() {
+export default function SiteFooter({ wide = false }: { wide?: boolean }) {
   return (
     <footer className={styles.footer}>
-      <div className={`${styles.wrap} ${styles.footerInner}`}>
+      <div className={`${wide ? styles.wideWrap : styles.wrap} ${styles.footerInner}`}>
         <p className={styles.disclaimer}>
           Овај портал агрегира јавно доступне податке из означених извора. Није званични сајт Републичке
           изборне комисије.

@@ -10,6 +10,7 @@
   --accent: #1e5e56;
   --accentInk: #133e38;
   --accentBg: #ddeeea;
+  --signal: #c6363c;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body), system-ui, sans-serif;
@@ -28,6 +29,7 @@
     --accent: #5fbfb0;
     --accentInk: #cdefe8;
     --accentBg: #1d3b36;
+    --signal: #f0696d;
   }
 }
 
@@ -49,6 +51,7 @@
   --accent: #5fbfb0;
   --accentInk: #cdefe8;
   --accentBg: #1d3b36;
+  --signal: #f0696d;
   flex: 1;
   background: var(--bg);
   color: var(--ink);
@@ -126,10 +129,8 @@
 }
 
 .timelineTag {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--inkMuted);
 }
 
@@ -182,12 +183,62 @@
   color: var(--accent);
 }
 
+.timelineDay .timelineDot {
+  background: var(--signal);
+  border-color: var(--signal);
+}
+
+.timelineDay .timelineTag,
+.timelineDay .timelineTitle {
+  color: var(--signal);
+}
+
+/* Wide screens: key dates run left to right instead of down a narrow column. */
+@media (min-width: 900px) {
+  .timelineList {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr));
+    margin-top: 26px;
+    padding: 0;
+  }
+  .timelineList::before {
+    left: 0;
+    right: 0;
+    top: 7px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+  }
+  .timelineItem {
+    padding: 28px 18px 0 0;
+  }
+  .timelineDot {
+    left: 0;
+    top: 0;
+    width: 16px;
+    height: 16px;
+  }
+  .timelineDesc {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
 .predictionSection {
   padding: 44px 0 8px;
 }
 
 .wrap {
   max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* One shared width for the home page: two 760px cards + 24px gap + 24px side padding. */
+.wideWrap {
+  max-width: 1592px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -222,16 +273,15 @@
 .wordmark {
   font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 800;
-  font-size: 15px;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  font-size: 19px;
   color: #ffffff;
   text-decoration: none;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 .wordmarkAccent {
-  opacity: 0.75;
+  font-weight: 500;
+  opacity: 0.8;
 }
 
 .nav {
@@ -253,6 +303,7 @@
 
 .record {
   padding: 22px 0 30px;
+  max-width: 712px;
 }
 
 .recordSubtitle {
@@ -317,11 +368,9 @@
 }
 
 .countdownLabel {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.8);
   display: block;
   margin-top: 4px;
 }
@@ -345,6 +394,9 @@
   flex-wrap: wrap;
   gap: 24px;
   align-items: flex-start;
+  justify-content: center;
+  max-width: 1592px;
+  margin: 0 auto;
   padding: 26px 24px 44px;
 }
 
@@ -359,29 +411,52 @@
   box-shadow: 0 16px 36px rgba(8, 18, 16, 0.25);
 }
 
-.predictionCardWrap {
-  flex: none;
-  width: 100%;
-  max-width: none;
+/* Below ~1200px the two cards stack: 60% of the screen, centred; on phones the full width. */
+@media (max-width: 1199px) {
+  .listGrid {
+    flex-direction: column;
+    align-items: center;
+  }
+  .listCardWrap {
+    flex: none;
+    width: 60%;
+    min-width: 520px;
+  }
+}
+
+@media (max-width: 719px) {
+  .listGrid {
+    align-items: stretch;
+    padding: 18px 16px 32px;
+  }
+  .listCardWrap {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    padding: 16px 16px 18px;
+  }
+}
+
+.pmCard {
   background: var(--surface);
   border: 1px solid var(--border);
-  box-shadow: none;
+  border-radius: 14px;
+  padding: 22px 24px 18px;
+  margin-top: 16px;
 }
 
-.predictionCardWrap .dividerLabel {
-  color: var(--ink);
+.pmGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 36px;
+  align-items: center;
 }
 
-.predictionCardWrap .dividerSub {
-  color: var(--ink2);
-}
-
-.predictionCardWrap .liveBadge {
-  color: #f0696d;
-}
-
-.predictionCardWrap .listBandHead {
-  border-bottom-color: var(--border);
+@media (max-width: 899px) {
+  .pmGrid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
 }
 
 .pmHeader {
@@ -403,8 +478,8 @@
 .pmTitle {
   font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 700;
-  font-size: 28px;
-  line-height: 1.15;
+  font-size: 22px;
+  line-height: 1.2;
   margin: 0;
   color: var(--ink);
 }
@@ -496,7 +571,7 @@
 
 .pmRow {
   display: grid;
-  grid-template-columns: 30px 56px minmax(0, 1fr) auto auto;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
   column-gap: 14px;
   align-items: center;
   padding: 16px 0;
@@ -509,25 +584,6 @@
   border-radius: 10px;
   background: var(--accentBg);
   border-top-color: transparent;
-}
-
-.pmRank {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--ink);
-  background: var(--surface2);
-  border: 1px solid var(--borderStrong);
-  border-radius: 6px;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pmRowLeader .pmRank {
-  background: var(--bg);
 }
 
 .pmPhoto {
@@ -605,48 +661,6 @@
   color: #ff7a70;
 }
 
-.pmBuy {
-  display: flex;
-  gap: 8px;
-}
-
-.pmYes,
-.pmNo {
-  min-height: 44px;
-  min-width: 94px;
-  box-sizing: border-box;
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.pmYes span,
-.pmNo span {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-weight: 600;
-}
-
-.pmYes {
-  background: #123b27;
-  color: #7ee0a7;
-}
-
-.pmNo {
-  background: #4a1616;
-  color: #ff9a94;
-}
-
-.pmYes:hover,
-.pmNo:hover {
-  filter: brightness(0.96);
-}
-
 .pmFooter {
   display: flex;
   align-items: center;
@@ -686,22 +700,18 @@
 
 @media (max-width: 620px) {
   .pmTitle {
-    font-size: 22px;
+    font-size: 19px;
   }
   .pmRow {
-    grid-template-columns: 30px 56px minmax(0, 1fr);
-    row-gap: 12px;
+    grid-template-columns: 56px minmax(0, 1fr);
+    row-gap: 8px;
   }
   .pmPct {
     grid-column: 2 / -1;
     justify-content: flex-start;
   }
-  .pmBuy {
-    grid-column: 1 / -1;
-  }
-  .pmYes,
-  .pmNo {
-    flex: 1;
+  .pmCard {
+    padding: 18px 16px 14px;
   }
 }
 
@@ -719,19 +729,10 @@
 .dividerLabel {
   font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 16px;
+  line-height: 22px;
   color: #1b1f1c;
   margin: 0;
-}
-
-.liveBadge {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  color: #c6363c;
-  margin-left: 6px;
 }
 
 .dividerSub {
@@ -872,6 +873,15 @@
   flex: none;
 }
 
+.newBadge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #133e38;
+  background: #ddeeea;
+  border-radius: 6px;
+  padding: 1px 7px;
+}
+
 .pagination {
   display: flex;
   align-items: center;
@@ -906,11 +916,11 @@
   padding: 44px 0 8px;
 }
 
-.newsHead {
+.darkHead {
   margin-bottom: 6px;
 }
 
-.newsHead h2 {
+.darkHead h2 {
   font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 700;
   font-size: 19px;
@@ -918,42 +928,97 @@
   color: var(--ink);
 }
 
-.newsHead p {
+.darkHead p {
   font-size: 13px;
   color: var(--inkMuted);
   margin: 0;
 }
 
-.newsRows {
+.newsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
   margin-top: 20px;
 }
 
-.newsRow {
-  display: grid;
-  grid-template-columns: 82px repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  align-items: stretch;
-  margin-bottom: 26px;
+.newsBlock {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px 6px;
 }
 
-.newsRow:last-child {
-  margin-bottom: 0;
-}
-
-@media (max-width: 700px) {
-  .newsRow {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .newsRowLabel {
-    grid-column: 1 / -1;
-    padding-bottom: 2px;
-  }
-}
-
-.newsRowLabel {
+.newsBlockHead {
   display: flex;
-  align-items: flex-start;
-  padding-top: 2px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+}
+
+.newsBlockHint {
+  font-size: 12.5px;
+  color: var(--ink2);
+}
+
+.newsItem {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  text-decoration: none;
+  color: inherit;
+}
+
+.newsItem:hover .newsItemTitle {
+  color: var(--accent);
+}
+
+.newsThumb {
+  width: 92px;
+  height: 62px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+  background: var(--surface2);
+}
+
+.newsItemTitle {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+
+.newsItemMeta {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink2);
+  margin: 4px 0 0;
+}
+
+@media (max-width: 899px) {
+  .newsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .newsItem {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
+  .newsThumb {
+    width: 76px;
+    height: 54px;
+  }
 }
 
 .newsLogo {
@@ -993,52 +1058,6 @@
 
 .logoInformer {
   background: #e6272a;
-}
-
-.newsCard {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-  text-decoration: none;
-  display: flex;
-  flex-direction: column;
-}
-
-.newsCard:hover {
-  border-color: var(--accent);
-}
-
-.newsCardImg {
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  display: block;
-  background: var(--surface2);
-}
-
-.newsCardBody {
-  padding: 10px 12px 12px;
-}
-
-.newsCardTitle {
-  font-size: 12.5px;
-  font-weight: 700;
-  line-height: 1.35;
-  color: var(--ink);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin: 0 0 8px;
-}
-
-.newsCardCat {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--accent);
 }
 
 .article {
@@ -1094,10 +1113,8 @@
 }
 
 .sourceStatus {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   color: var(--accent);
 }
 
